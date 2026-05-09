@@ -1,0 +1,403 @@
+\documentclass{scrartcl}
+\usepackage{graphicx}  % required for inserting images
+
+% for cyrillic and Bulgarian language
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[bulgarian]{babel}
+
+% math packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cancel}
+
+\usepackage{ragged2e}  % adds FlushLeft
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    language=Octave,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,
+    captionpos=b,
+    keepspaces=false,                 
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    columns=fullflexible,
+}
+
+\lstset{style=mystyle}
+
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+
+\newtheorem{theorem}{Теорема}
+\newtheorem{definition}{Дефиниция}
+
+\title{Линейна алгебра - собствени вектори и собствени стойности}
+\author{Ивайло Андреев}
+\date{5 май 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\begin{FlushLeft}
+
+Нека $V$ е линейно пространство над числово поле $F$ и нека $\dim{V} = n \in \mathbb{N} \setminus \lbrace 0 \rbrace$.
+
+Нека $\varphi \in \text{Hom}{V}$ е линеен оператор.
+
+Тези означения важат за цялата тема.
+
+\section{Определение на характеристичен полином на матрица}
+
+\begin{definition}
+(Характеристичен полином и характеристични корени на матрица)
+
+Нека $A \in M_n(F)$.
+
+Характеристичен полином на матрицата $A$ e
+\[
+P_A(\lambda) = \det(A - \lambda E)
+\]
+
+Характеристични корени на матрицата $A$ са корените на характеристичния полином.
+\end{definition}
+
+\section{Подобни матрици и
+доказателство, че подобните матрици имат едни и същи характеристични полиноми}
+
+\begin{definition}
+(Подобна матрица)
+Нека $A, B \in M_n(F)$.
+
+Матриците $A$ и $B$ са подобни (и пишем $A \sim B$), ако съществува обратима матрица $T \in M_n(F)$, такава че
+
+$$B = T^{-1}AT$$
+\end{definition}
+
+\begin{theorem}
+Подобните матрици имат един и същи характеристичен полином.
+\end{theorem}
+
+\textbf{Доказателство:}
+
+Нека $A, B \in M_n(F)$ и нека $A \sim B$. Тогава съществува обратима матрица $T$, такава че $B = T^{-1}AT$
+
+Ще покажем, че $P_B(\lambda) = P_A(\lambda)$.
+
+\begin{align*}
+P_B(\lambda)
+&= \det(B - \lambda E)\\
+&= \det(T^{-1}AT - \lambda E)\\
+&= \det(T^{-1}AT - \lambda T^{-1} ET)\\
+&= \det(T^{-1}(A - \lambda E)T)\\
+&= \det(T^{-1})\det(A - \lambda E)\det(T)\\
+&= \det(T)^{-1}\det(A - \lambda E)\det(T)\\
+&= \det(A - \lambda E)\\
+&= P_A(\lambda)\\
+\end{align*}
+
+\section{Определение на характеристичен полином на линеен оператор}
+
+\begin{definition}
+(Характеристичен полином и характеристични корени на линеен оператор)
+
+Характеристичен полином на линейния оператор $\varphi$ е характеристичния полином на матрицата на $\varphi$ в който и да е базис на $V$.
+
+Характеристични корени на линейния оператор $\varphi$ са корените на характеристичния полином.
+\end{definition}
+
+\section{Определение на
+собствен вектор и собствена стойност на линеен оператор}
+
+\begin{definition}
+(Собствен вектор и собствена стойност)
+
+Нека $\vec{v}\in V$.
+
+Наричаме вектора $\vec{v}$ собствен вектор, съответстващ на собствената стойност $\lambda \in F$, ако
+
+\begin{enumerate}
+    \item $\vec{v} \ne \vec{0}$
+    \item $\varphi(\vec{v}) = \lambda \vec{v}$
+\end{enumerate}
+\end{definition}
+
+\section{Необходимо и достатъчно
+условие характеристичен корен на линеен оператор да е собствена стойност в
+крайномерно линейно пространство}
+
+\begin{theorem}
+Характеристични корени на линейния оператор $\varphi$, които са в полето $F$, са (единствените) собствени стойности на линейния оператор $\varphi$.
+\end{theorem}
+
+\textbf{Доказателство:}
+
+Нека $\{e_i\}_{i=1}^n$ е фиксиран базис на $V$.
+
+Нека $A$ е матрицата на $\varphi$ в базиса $\{e_i\}_{i=1}^n$.
+
+\textbf{Права посока}
+
+Нека $\lambda \in F$ е собствена стойност, съответстваща на ненулевия собствен вектор $\vec{v} \neq \vec{0}$. Ще покажем, че $\lambda$ е корен на характеристичния полином на $\varphi$.
+
+По дефиниция
+
+$$\varphi(\vec{v}) = \lambda \vec{v}$$
+
+Нека координатите на $\vec{v}$ в базиса $\{e_i\}_{i=1}^n$ са $\vec{\alpha}$
+
+$$\vec{v} = \sum_{i=1}^n \alpha_i e_i$$
+
+Знаем, че $\vec{v}$ е собствен вектор, в частност ненулев, и съответно координатите му не са нулев вектор. Тоест
+
+$$\vec{\alpha} \ne \vec{0}$$
+
+Нека координатите на $\varphi(\vec{v})$ в базиса $\{e_i\}_{i=1}^n$ са $\vec{\beta}$
+
+$$\varphi(\vec{v}) = \sum_{i=1}^n \beta_i e_i$$
+
+Знаем, че $\vec{v}$ е собствен вектор и е изпълнено равенството
+
+$$\varphi(\vec{v}) = \lambda \vec{v}$$
+
+$$\sum_{i=1}^n \beta_i e_i = \lambda \sum_{i=1}^n \alpha_i e_i$$
+
+$$\sum_{i=1}^n \beta_i e_i = \sum_{i=1}^n (\lambda\alpha_i) e_i$$
+
+Приравнявайки подобните коефициенти пред базисните вектори получаваме
+
+$$\vec{\beta} = \lambda \vec{\alpha}$$
+
+От друга страна от теоремата за линейни оператори знаем, че
+
+$$\vec{\beta} = A \vec{\alpha}$$
+
+Приравняваме и получаваме
+
+$$A \vec{\alpha} = \lambda \vec{\alpha}$$
+
+$$A \vec{\alpha} - \lambda \vec{\alpha} = 0$$
+
+$$A \vec{\alpha} - \lambda E \vec{\alpha} = 0$$
+
+$$(A  - \lambda E) \vec{\alpha} = 0$$
+
+Получаваме хомогенна система линейни уравнения. Вече споменахме, че $\vec{\alpha} \ne \vec{0}$ и съответно системата притежава нетривиални решения. Тогава детерминантата на матрицата $A - \lambda E$ е нула.
+
+$$\det{(A - \lambda E)} = 0$$
+
+$$P_A(\lambda) = 0$$
+
+Така получаваме, че $\lambda$, която по начало казахме, че е собствена стойност на линейния оператор, също е и корен на характеристичния полином на линейния оператор.
+
+\textbf{Обратна посока}
+
+Нека $\lambda \in F$ е корен на характеристичния полином на линейния оператор $\varphi$. Ще покажем, че $\lambda$ е собствена стойност на $\varphi$.
+
+По дефиниция
+
+$$\det(A - \lambda E) = 0$$
+
+Разглеждаме хомогенната система линейни уравнения спрямо неизвестния вектор-стълб $\vec{x}$
+
+$$(A - \lambda E)\vec{x} = \vec{0}$$
+
+Тъй като детерминантата на матрицата на системата е нула, системата притежава ненулево решение $\vec{\alpha} \neq \vec{0}$, такова че
+
+$$A \vec{\alpha} = \lambda \vec{\alpha}$$
+
+Нека $\vec{v} = \sum_{i=1}^n \alpha_i e_i$ е векторът от $V$, чийто координати в базиса $\{e_i\}_{i=1}^n$ са точно елементите на вектора $\vec{\alpha}$. Знаем, че $\vec{\alpha} \neq \vec{0}$, то и $\vec{v} \neq \vec{0}$.
+
+От матричното представяне на линейния оператор знаем, че ако координатите на $\varphi(\vec{v})$ в базиса $\{e_i\}_{i=1}^n$ са $\vec{\beta}$, то е изпълнено равенството 
+
+$$\vec{\beta} = A \vec{\alpha}$$
+
+След приравняване
+
+$$\vec{\beta} = A \vec{\alpha} = \lambda \vec{\alpha}$$
+
+Това означава, че векторът $\varphi(\vec{v})$ има координати $\lambda \vec{\alpha}$, т.е.
+
+$$\varphi(\vec{v}) = \sum_{i=1}^n (\lambda \alpha_i) e_i = \lambda \sum_{i=1}^n \alpha_i e_i = \lambda \vec{v}$$
+
+Тъй като $\vec{v} \neq \vec{0}$ и $\varphi(\vec{v}) = \lambda \vec{v}$, то по дефиниция $\lambda$ е собствена стойност на линейния оператор $\varphi$.
+
+С това теоремата е доказана в двете посоки.
+
+\section{Доказателство, че собствените вектори на линеен
+оператор, съответстващи на различни собствени стойности са линейно независими}
+
+\begin{theorem}\label{theorem_linear_independency}
+Собствените вектори, съответстващи на различни собствени стойности, са линейно независими.
+\end{theorem}
+
+\textbf{Доказателство:}
+
+Нека $\lambda_1, \dots, \lambda_k$ са различни собствени стойности, съответстващи на собствените вектори $\vec{v}_1, \dots, \vec{v}_k$.
+
+Индукция по $k$.
+
+\textbf{База}: $k= 1$
+
+По определение собствения вектор е ненулев и знаем, че система от един ненулев вектор е линейно независима.
+
+\textbf{Индукционно предположение}: $k = n$
+
+Нека $\lambda_1, \dots, \lambda_n$ са различни собствени стойности, съответстващи на линейно независимите собствените вектори $\vec{v}_1, \dots, \vec{v}_n$. Допускаме, че твърдението е вярно за всяка система от $n$ вектора.
+
+\textbf{Стъпка}: $k = n + 1$
+
+Разглеждаме равенството
+
+\begin{equation}
+    \beta_1 \vec{v}_1 + \dots + \beta_n \vec{v}_n + \beta_{n+1} \vec{v}_{n+1} = \vec{0} \label{bofore_phi}
+\end{equation}
+
+Ще покажем, че всички коефициенти $\beta_i = 0 \quad i \in \{1 \dots n+1\}$ от линейната комбинация са нули, откъдето ще следва, че векторите са линейно независими.
+
+$$\varphi(\beta_1 \vec{v}_1 + \dots + \beta_n \vec{v}_n + \beta_{n+1} \vec{v}_{n+1}) = \varphi(\vec{0})$$
+
+$$\varphi(\beta_1 \vec{v}_1) + \dots + \varphi(\beta_n \vec{v}_n) + \varphi(\beta_{n+1} \vec{v}_{n+1}) = \varphi(\vec{0})$$
+
+\begin{equation}
+    \lambda_1\beta_1 \vec{v}_1 + \dots + \lambda_n\beta_n \vec{v}_n + \lambda_{n+1}\beta_{n+1} \vec{v}_{n+1} = \vec{0} \label{after_phi}
+\end{equation}
+
+Имаме уравненията \eqref{bofore_phi} и \eqref{after_phi}. Целим се да елиминираме терма $\vec{v}_{n+1}$, за да можем да стигнем до уравнение, където да можем да използваме индукционното предположение. Ще постигнем това като умножим равенството \eqref{bofore_phi} с $\lambda_{n+1}$ и го извадим от равенството \eqref{after_phi}.
+
+$$(\lambda_1 - \lambda_{n+1})\beta_1 \vec{v}_1 + \dots + (\lambda_n - \lambda_{n+1})\beta_n \vec{v}_n + (\lambda_{n+1} - \lambda_{n+1})\beta_{n+1} \vec{v}_{n+1} = \vec{0}$$
+
+\begin{equation}
+    (\lambda_1 - \lambda_{n+1})\beta_1 \vec{v}_1 + \dots + (\lambda_n - \lambda_{n+1})\beta_n \vec{v}_n = \vec{0} \label{after_subtraction}
+\end{equation}
+
+От индукционното предположение знаем, че $\vec{v}_1, \dots, \vec{v}_n$ са линейно независими. Това означава, че коефициентите в линейната комбинация, даваща нула, също са нули. В \eqref{after_subtraction} коефициентите $\lambda_i - \lambda_{n+1} \ne 0 \quad i \in \{1 \dots n\}$ са ненулеви, защото собствените стойности са различни по условие. Тогава остава $\beta_i = 0 \quad i \in \{1 \dots n\}$.
+
+Заместваме в \eqref{bofore_phi} с нулевите коефициенти
+
+$$\beta_{n+1} \vec{v}_{n+1} = \vec{0}$$
+
+Векторът $\vec{v}_{n+1}$ е собствен и в частност ненулев, откъдето $\beta_{n+1} = 0$.
+
+Показахме, че $\beta_i = 0 \quad i \in \{1 \dots n+1\}$, с което теоремата е доказана.
+
+\section{Линеен оператор с прост спектър (с доказателство)}
+
+\begin{definition}
+Линеен оператор има прост спектър, ако има $n$ различни собствени стойности.
+\end{definition}
+
+\begin{theorem}
+Съществува базис на линеен оператор с прост спектър $\varphi \in \text{Hom}{V}$, в който матрицата на $\varphi$ да е диагонална.
+\end{theorem}
+
+\textbf{Доказателство:}
+
+Линейният оператор $\varphi$ е с прост спектър и съответно притежава $n$ на брой различни собствени стойности. Нека това са $\lambda_1$, $\dots$, $\lambda_n$. Нека на тези собствени стойности съответстват собствените вектори $\vec{v}_1$, $\dots$, $\vec{v}_n$. Според теорема \ref{theorem_linear_independency} $\vec{v}_1$, $\dots$, $\vec{v}_n$ са линейно независими и тъй като са $n$ на брой образуват базис на $V$.
+
+Знаем, че $\varphi(\vec{v}_i) = \lambda_i \vec{v}_i$, понеже векторите са собствени. От определението за матрица на линеен оператор следва, че матрицата на $\varphi$ в базиса на собствените вектори има вида
+
+$$
+D =
+\begin{pmatrix}
+    \lambda_1 & & 0\\
+    & \ddots &\\
+    0 & & \lambda_n
+\end{pmatrix}
+$$
+
+което е диагонална матрица, с което теоремата е доказана.
+
+\section{Определение за ф-инвариантно
+подпространство на линейно пространство}
+
+\begin{definition}
+Нека $U$ е подпространство на $V$.
+
+Подпространството $U$ e $\varphi$-инвариантно, ако за всеки вектор $\vec{u} \in U$ е изпълнено, че $\varphi(\vec{u}) \in U$
+\end{definition}
+
+\section{Основни примери за ф-инвариантни
+подпространства (с доказателство)}
+
+\subsection{Пример 1}
+
+Очевидно $U = V$ е $\varphi$-инвариантно подпространство.
+
+$$\dots$$
+
+Подпространството $U = \lbrace \vec{0} \rbrace$ е $\varphi$-инвариантно за всеки линеен оператор $\varphi$, защото линейните оператори имат свойството, че $\varphi(\vec{0}) = \vec{0}$.
+
+\subsection{Пример 2}
+
+Подпространството $\text{Ker}\varphi$ е $\varphi$-инвариантно подпространство.
+
+Нека $\vec{u} \in \text{Ker}\varphi$. Тогава $\varphi(\vec{u}) = \vec{0}$
+
+$$\varphi(\varphi(\vec{u})) = \varphi(\vec{0}) = \vec{0} \in \text{Ker}\varphi$$
+
+$$\dots$$
+
+Подпространството $\text{Im}\varphi$ е $\varphi$-инвариантно подпространство.
+
+Нека $\vec{b} \in \text{Im}\varphi$. Тогава съществува $\vec{a}$, за който $\varphi(\vec{a}) = \vec{b}$.
+
+$$\varphi(\varphi(\vec{a})) = \varphi(\vec{b}) \in \text{Im}\varphi$$
+
+\subsection{Пример 3}
+
+Подпространството $U = \{\vec{v} \in V \space | \space \varphi(\vec{v}) = \lambda \vec{v}\}$, където $\lambda$ е фиксирана собствена стойност, е $\varphi$-инвариантно подпространство.
+
+Нека $\vec{u} \in U$. Тогава $\varphi(\vec{u}) = \lambda \vec{u}$.
+
+$$\varphi(\varphi(\vec{u})) = \varphi(\lambda \vec{u}) = \lambda\varphi(\vec{u})$$
+
+$\vec{w} = \varphi(\vec{u}) \in U$ и също така $\lambda \vec{w} \in U$
+
+$$\dots$$
+
+Подпространството $U = l(\vec{v})$, където $\vec{v}$ е фиксиран собствен вектор, е $\varphi$-инвариантно подпространство.
+
+Нека $\vec{u} \in U$. Тогава съществува скалар $\alpha \in F$, такъв че $\vec{u} = \alpha \vec{v}$.
+
+Знаем, че $\vec{v}$ е собствен вектор и съответно $\varphi(\vec{v}) = \lambda \vec{v}$.
+
+$$\varphi(\vec{u}) = \varphi(\alpha \vec{v}) = \alpha\varphi(\vec{v}) = \alpha(\lambda\vec{v}) = (\alpha\lambda)\vec{v} \in U$$
+
+\section{Теореми за съществуване на ф-инвариантни
+подпространства на линейно пространство над полето на реалните и на комплексните числа (без доказателство)}
+
+\begin{theorem}
+Нека $V$ е линейно пространство над $\mathbb{R}$ и нека $\dim{V} = n \in \mathbb{N} \setminus \lbrace 0 \rbrace$ и нека $\varphi \in \text{Hom}{V}$. Тогава $\varphi$ има едномерно или двумерно $\varphi$-инвариантно подпространство.
+\end{theorem}
+
+\begin{theorem}
+Нека $V$ е линейно пространство над $\mathbb{C}$ и нека $\dim{V} = n \in \mathbb{N} \setminus \lbrace 0 \rbrace$ и нека $\varphi \in \text{Hom}{V}$. Тогава за всяка собствена стойност $\lambda \in \mathbb{C}$ съществува собствен вектор $\vec{v}$, такъв че едномерното подпространство на линейната му обвивка $l(v)$ е $\varphi$-инвариантно.
+\end{theorem}
+
+\end{FlushLeft}
+
+\end{document}
