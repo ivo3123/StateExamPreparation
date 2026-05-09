@@ -1,0 +1,475 @@
+\documentclass{scrartcl}
+\usepackage{graphicx}  % required for inserting images
+
+% for cyrillic and Bulgarian language
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[bulgarian]{babel}
+
+% math packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cancel}
+
+\usepackage{ragged2e}  % adds FlushLeft
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+
+\newtheorem{definition}{Дефиниция}
+\newtheorem{theorem}{Теорема}
+
+\title{Бази от данни - релационен модел на данните}
+\author{Ивайло Андреев + chat gpt 5.5, DeepSeek-V3, gemini 3 Flash}
+\date{9 май 2026}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\begin{FlushLeft}
+
+\section{Въведение}
+
+\subsection{База данни и СУБД}
+
+\textbf{\textit{База данни (БД)}} е организирана колекция от свързани данни, предназначена за ефективно съхранение, търсене и управление в информационни системи.
+
+\textbf{\textit{Система за управление на база данни (СУБД)}} е софтуерен инструмент, който осигурява средства за дефиниране, съхранение, извличане и манипулиране на данни в БД. Примери: MySQL, PostgreSQL, Oracle, SQL Server, MongoDB.
+
+\subsection{Модели на бази данни}
+
+Моделът на БД определя логическата структура на данните и начина на тяхната организация. Основните категории са:
+
+\begin{itemize}
+    \item \textbf{Релационен модел} --- Представя данните като таблици (релации) с редове (кортежи) и колони (атрибути). Манипулацията се извършва чрез SQL. Подходящ за данни със стабилна, строго дефинирана структура.
+\end{itemize}
+
+Нерелационните модели (NoSQL) съществуват като алтернатива, но в тази тема фокусът е върху релационния модел.
+
+\section{Релационен модел на данните}
+
+\subsection{Домейн}
+
+\begin{definition}
+\textbf{\textit{Домейн (Област)}} е множество от допустими стойности за дадена величина. Релационният модел изисква стойностите на всички елементи в кортежите да бъдат \textbf{атомарни} (неделими на части).
+\end{definition}
+
+Домейнът обикновено дефинира скаларния тип данни (INTEGER, VARCHAR, DATE и т.н.) и допълнителни ограничения.
+
+\subsection{Релация}
+
+\begin{definition}
+\textbf{\textit{Релация}} е подмножество на декартово произведение $D_1 \times D_2 \times \cdots \times D_n$, където $D_i$ са домейни. В контекста на БД релацията представлява таблица с редове (кортежи) и колони (атрибути).
+\end{definition}
+
+\subsection{Кортеж}
+
+\begin{definition}
+\textbf{\textit{Кортеж}} е всеки елемент на релация, т.е. наредена $n$-торка от стойности. Тъй като релацията е множество, всеки кортеж трябва да е уникален.
+\end{definition}
+
+\textbf{\textit{Екземпляр на релация}} е множеството от всички текущо съхранени кортежи. \textbf{\textit{Кардиналност}} е броят на кортежите в екземпляра.
+
+\subsection{Атрибути}
+
+\begin{definition}
+\textbf{\textit{Атрибут}} е наименование на колона в релация. Всеки атрибут $A_i$ е асоцииран с домейн $D_i$. Атрибутите описват характеристиките на съхранените обекти.
+\end{definition}
+
+\subsection{Схема на релация}
+
+\begin{definition}
+\textbf{\textit{Схема на релация}} $R$ се дефинира чрез име $R$, множество от атрибути $\{A_1, A_2, \ldots, A_n\}$ и съответните домейни. Обозначение: $R(A_1, A_2, \ldots, A_n)$.
+\end{definition}
+
+Свързани понятия:
+
+\begin{itemize}
+    \item \textbf{Степен (Arity)} --- Броят на атрибутите в схемата. Статична характеристика.
+    \item \textbf{Кардиналност} --- Броят на кортежите в момента. Динамична характеристика.
+\end{itemize}
+
+\subsection{Схема на релационна база данни}
+
+\begin{definition}
+\textbf{\textit{Схема на релационна БД}} е съвкупност от всички схеми на релации, включително ограниченията за интегритет (например външни ключове), които управляват връзките между релациите.
+\end{definition}
+
+\textbf{\textit{Екземпляр на БД}} е съвкупност от екземплярите на всички релации в дадения момент.
+
+\subsection{Проектиране на релационна БД}
+
+Проектирането обикновено включва:
+
+\begin{enumerate}
+    \item Определяне какви данни да се съхраняват.
+    \item Дефиниране на връзки между данните.
+    \item Определяне на ограничения (ключове, домейни и т.н.).
+\end{enumerate}
+
+В практиката се използва \textbf{Entity/Relationship (E/R) модел}, който се преобразува към релационна схема на БД чрез:
+
+\begin{itemize}
+    \item Всяка същност (Entity) се превръща в релация със същите атрибути.
+    \item Всяка връзка (Relationship) се превръща в релация, чиито атрибути са ключовете на свързаните същности.
+\end{itemize}
+
+\subsection{Ключове}
+
+\begin{definition}
+\textbf{\textit{Суперключ}} е множество от атрибути, което еднозначно определя всеки кортеж в релацията.
+\end{definition}
+
+\begin{definition}
+\textbf{\textit{Кандидат-ключ}} е минимален суперключ.
+\end{definition}
+
+\begin{definition}
+\textbf{\textit{Първичен ключ}} е избран кандидат-ключ, използван за идентификация на кортежите.
+\end{definition}
+
+\begin{definition}
+\textbf{\textit{Външен ключ}} е атрибут или множество от атрибути в релация $R$, които реферират към първичен ключ в друга (или същата) релация.
+\end{definition}
+
+\subsection{Интегритетни ограничения и NULL}
+
+\begin{itemize}
+    \item \textbf{Entity Integrity} --- първичният ключ не може да има \texttt{NULL} стойност.
+    \item \textbf{Referential Integrity} --- всяка ненулева стойност на външен ключ трябва да съответства на съществуващ ключ в реферираната релация.
+\end{itemize}
+
+\textbf{\texttt{NULL}} означава липсваща, неизвестна или неприложима стойност. Тя не е число, не е празен низ и не е нула. При сравнения с \texttt{NULL} се използват \texttt{IS NULL} / \texttt{IS NOT NULL}.
+
+\section{Видове операции}
+
+\subsection{DDL (Data Definition Language)}
+
+DDL операциите служат за дефиниране на схемата на БД. Включват CREATE, DROP и ALTER.
+
+\begin{lstlisting}[language=SQL, caption=DDL examples]
+-- Create table Employees
+CREATE TABLE Employees (
+    employee_id INT PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    salary DECIMAL(10,2),
+    department_id INT
+);
+
+-- Add new column
+ALTER TABLE Employees ADD hire_date DATE;
+
+-- Drop column
+ALTER TABLE Employees DROP COLUMN hire_date;
+
+-- Drop table
+DROP TABLE Employees;
+\end{lstlisting}
+
+\subsection{DML (Data Manipulation Language)}
+
+DML операциите служат за манипулация на данните: SELECT, INSERT, UPDATE, DELETE.
+
+\begin{lstlisting}[language=SQL, caption=DML examples]
+-- Select rows
+SELECT employee_id, first_name, last_name
+FROM Employees
+WHERE salary > 50000;
+
+-- Insert row
+INSERT INTO Employees (employee_id, first_name, last_name, salary)
+VALUES (1, 'John', 'Doe', 75000);
+
+-- Update rows
+UPDATE Employees
+SET salary = 80000
+WHERE employee_id = 1;
+
+-- Delete rows
+DELETE FROM Employees
+WHERE salary < 30000;
+\end{lstlisting}
+
+\section{Заявки към релационна БД}
+
+\subsection{Основни примери}
+
+\begin{lstlisting}[language=SQL, caption=SELECT with JOIN]
+-- INNER JOIN
+SELECT 
+    e.first_name, 
+    e.last_name, 
+    d.department_name
+FROM Employees e
+INNER JOIN Departments d ON e.department_id = d.department_id
+WHERE e.salary > 60000;
+
+-- LEFT JOIN
+SELECT 
+    d.department_name,
+    e.first_name,
+    e.last_name
+FROM Departments d
+LEFT JOIN Employees e ON d.department_id = e.department_id
+ORDER BY d.department_name;
+\end{lstlisting}
+
+\begin{lstlisting}[language=SQL, caption={INSERT, UPDATE, DELETE examples}]
+INSERT INTO Employees (employee_id, first_name, last_name, salary, department_id)
+VALUES (10, 'Anna', 'Petrova', 3200.00, 3);
+
+UPDATE Employees
+SET salary = 3500.00
+WHERE employee_id = 10;
+
+DELETE FROM Employees
+WHERE employee_id = 10;
+\end{lstlisting}
+
+\section{Тригери}
+
+\begin{definition}
+\textbf{\textit{Тригер (Trigger)}} е специален тип съхранена процедура, която автоматично се активира като отговор на определено събитие (INSERT, UPDATE, DELETE) в дадена таблица.
+\end{definition}
+
+\subsection{Пример за тригер}
+
+\begin{lstlisting}[language=SQL, caption=Trigger: log salary changes]
+-- Log salary changes into Salary_Log
+CREATE TRIGGER log_salary_change
+AFTER UPDATE OF salary ON Employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO Salary_Log (employee_id, old_salary, new_salary, change_date)
+    VALUES (NEW.employee_id, OLD.salary, NEW.salary, NOW());
+END;
+\end{lstlisting}
+
+\section{Релационна алгебра}
+
+\textbf{\textit{Релационна алгебра}} е математическа система, която дефинира операции над релации. Служи като основа на SQL заявките.
+
+\textbf{Важно:} SQL е практически език, вдъхновен от релационната алгебра, но не е напълно еквивалентен на нея. Аналогиите $\pi \leftrightarrow$ \texttt{SELECT} и $\sigma \leftrightarrow$ \texttt{WHERE} са полезни, но не са пълна формална идентичност.
+
+\subsection{Съвместими релации}
+
+\begin{definition}
+Релациите $R(A_1, \ldots, A_n)$ и $S(B_1, \ldots, B_m)$ са \textbf{\textit{съвместими}}, ако:
+\begin{itemize}
+    \item $n = m$ (еднакъв брой атрибути)
+    \item $\text{dom}(A_i) = \text{dom}(B_i)$ за всеки $i$ (еднакви домейни)
+    \item Редът на атрибутите съвпада
+\end{itemize}
+\end{definition}
+
+\subsection{Основни операции}
+
+\subsubsection{Обединение (Union)}
+
+\begin{definition}
+\textbf{\textit{Обединение}} $R \cup S$ на съвместими релации $R$ и $S$ съдържа всички кортежи, които се намират в $R$ или $S$ (или в двете).
+\end{definition}
+
+Свойства: комутативна и асоциативна.
+
+\begin{lstlisting}[language=SQL, caption=UNION]
+SELECT employee_id, name FROM full_time_employees
+UNION
+SELECT employee_id, name FROM part_time_employees;
+\end{lstlisting}
+
+\subsubsection{Разлика (Difference)}
+
+\begin{definition}
+\textbf{\textit{Разлика}} $R \setminus S$ съдържа всички кортежи на $R$, които не се намират в $S$.
+\end{definition}
+
+Свойства: некомутативна.
+
+\begin{lstlisting}[language=SQL, caption=EXCEPT or MINUS]
+SELECT employee_id, name FROM all_employees
+EXCEPT
+SELECT employee_id, name FROM terminated_employees;
+\end{lstlisting}
+
+\subsubsection{Проекция (Projection)}
+
+\begin{definition}
+\textbf{\textit{Проекция}} $\pi_{A_{i_1}, \ldots, A_{i_k}}(R)$ на релация $R$ със атрибути $\{A_1, \ldots, A_n\}$ е релация, съдържаща само избраните атрибути $\{A_{i_1}, \ldots, A_{i_k}\}$.
+\end{definition}
+
+Е еквивалентна на SQL SELECT с определени колони.
+
+\begin{lstlisting}[language=SQL, caption=Projection (SELECT)]
+SELECT first_name, last_name
+FROM Employees;
+\end{lstlisting}
+
+\subsubsection{Селекция (Selection)}
+
+\begin{definition}
+\textbf{\textit{Селекция}} $\sigma_P(R)$ е множество от всички кортежи в $R$, които удовлетворяват предиката $P$.
+\end{definition}
+
+Е еквивалентна на SQL WHERE клаузула.
+
+\begin{lstlisting}[language=SQL, caption=Selection (WHERE)]
+SELECT *
+FROM Employees
+WHERE salary > 50000 AND department_id = 2;
+\end{lstlisting}
+
+\subsubsection{Декартово произведение (Cartesian Product)}
+
+\begin{definition}
+\textbf{\textit{Декартово произведение}} $R \times S$ съдържа всички възможни комбинации на кортежи от $R$ с кортежи от $S$.
+\end{definition}
+
+Ако $R$ има $m$ редове и $S$ има $n$ редове, $R \times S$ има $m \times n$ редове.
+
+\begin{lstlisting}[language=SQL, caption=Cartesian product]
+SELECT e.employee_id, d.department_id
+FROM Employees e, Departments d;
+-- Or: FROM Employees e CROSS JOIN Departments d;
+\end{lstlisting}
+
+\subsubsection{Преименуване (Renaming)}
+
+\begin{definition}
+\textbf{\textit{Преименуване}} $\rho_{R'/R}(R)$ или в SQL AS позволяват смяна на имена на релации и атрибути без промяна на данните.
+\end{definition}
+
+\begin{lstlisting}[language=SQL, caption=Renaming]
+SELECT e.employee_id AS emp_id, e.first_name AS name
+FROM Employees AS e;
+\end{lstlisting}
+
+\subsection{Допълнителни операции}
+
+\subsubsection{Сечение (Intersection)}
+
+\begin{definition}
+\textbf{\textit{Сечение}} $R \cap S$ съдържа само кортежите, които се намират едновременно в $R$ и $S$.
+\end{definition}
+
+Свойства: комутативна, асоциативна. Може да се изрази чрез разлика: $R \cap S = R \setminus (R \setminus S)$.
+
+\begin{lstlisting}[language=SQL, caption=INTERSECT]
+SELECT employee_id FROM employees_2023
+INTERSECT
+SELECT employee_id FROM employees_2024;
+\end{lstlisting}
+
+\subsubsection{Съединение (Join)}
+
+\begin{definition}
+\textbf{\textit{Theta Join}} $R \underset{P}{\bowtie} S$ е множество от всички кортежи от $R \times S$, които удовлетворяват предиката $P$.
+\end{definition}
+
+Може да се изрази чрез декартово произведение и селекция: $R \underset{P}{\bowtie} S = \sigma_P(R \times S)$.
+
+\textbf{\textit{Естествено съединение}} $R \bowtie S$ е частен случай на theta join, където съединяваме релации по атрибути с еднакви имена. Резултатът съдържа само един екземпляр от общите атрибути.
+
+\begin{lstlisting}[language=SQL, caption=JOIN operations]
+-- Theta Join (INNER JOIN)
+SELECT *
+FROM Employees e, Departments d
+WHERE e.department_id = d.department_id;
+
+-- Equivalent form:
+SELECT *
+FROM Employees e
+INNER JOIN Departments d ON e.department_id = d.department_id;
+
+-- Natural join (same attribute names)
+SELECT *
+FROM Employees
+JOIN Departments USING (department_id);
+\end{lstlisting}
+
+\subsubsection{Частно (Division)}
+
+\begin{definition}
+\textbf{\textit{Частното}} $R \div S$ (където $S$ има подмножество на атрибутите на $R$) съдържа всички кортежи от $\pi_{\text{остатък}}(R)$, за които всяка комбинация с кортежи от $S$ съществува в $R$.
+\end{definition}
+
+Интуиция: Ако $R$ съдържа (student\_id, sport) и $S$ съдържа (sport), то $R \div S$ дава студентите, които правят ВСЕ спортове в $S$.
+
+\textit{Пример:}
+
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{StudentSports} & \\
+\hline
+student\_id & sport \\
+\hline
+1 & badminton \\
+2 & cricket \\
+2 & badminton \\
+4 & cricket \\
+\hline
+\end{tabular}
+\hspace{1cm}
+\begin{tabular}{|c|}
+\hline
+\textbf{Sports} \\
+\hline
+sport \\
+\hline
+badminton \\
+cricket \\
+\hline
+\end{tabular}
+\hspace{1cm}
+\begin{tabular}{|c|}
+\hline
+\textbf{StudentSports} $\div$ \textbf{Sports} \\
+\hline
+student\_id \\
+\hline
+2 \\
+\hline
+\end{tabular}
+\end{center}
+
+Резултатът съдържа само студент 2, защото той е единственият, който се участва в двата спорта.
+
+\end{FlushLeft}
+
+\end{document}

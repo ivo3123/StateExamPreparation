@@ -1,0 +1,531 @@
+\documentclass{scrartcl}
+\usepackage{graphicx}  % required for inserting images
+
+% for cyrillic and Bulgarian language
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[bulgarian]{babel}
+
+% math packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cancel}
+
+\usepackage{ragged2e}  % adds FlushLeft
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+
+\newtheorem{definition}{Дефиниция}
+\newtheorem{theorem}{Теорема}
+\newtheorem{remark}{Забележка}
+
+\title{Бази от данни - нормални форми}
+\author{Ивайло Андреев + chat gpt 5.5, DeepSeek-V3, gemini 3 Flash}
+\date{9 май 2026}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\begin{FlushLeft}
+
+\section{Проектиране на схеми на релационни БД}
+
+Преводът на ER модел (модел на данните) в набор от релации изисква внимателен дизайн. Целите на проектирането са:
+
+\begin{itemize}
+    \item Запазване на цялостта на данните
+    \item Избягване на излишествата (дублирането на информация)
+    \item Елиминиране на аномалиите при добавяне, обновяване и изтриване
+\end{itemize}
+
+\textbf{\textit{Нормализация}} е процесът на реструктуриране на релациите чрез последователно прилагане на нормални форми, което елиминира определени типове проблеми.
+
+\section{Функционални зависимости}
+
+\begin{definition}
+Нека $R$ е релация и $X, Y$ са множества от атрибути на $R$. \textbf{\textit{Функционална зависимост (ФЗ)}} $X \rightarrow Y$ е твърдение, че за всяка допустима инстанция на релацията: ако два кортежа $t_1, t_2$ имат еднакви стойности на атрибутите в $X$, то те имат еднакви стойности и на атрибутите в $Y$.
+
+Четем: ``$X$ функционално определя $Y$'' или ``$Y$ функционално зависи от $X$''.
+\end{definition}
+
+\subsection{Пример}
+
+Ако в таблица Students student\_id е уникален ключ, то $\{\text{student\_id}\} \rightarrow \{\text{name}\}$ е ФЗ, защото стойността на student\_id еднозначно определя записа за конкретен студент.
+
+\subsection{Правила за манипулация на ФЗ}
+
+Следните правила следват от аксиомите на Армстронг:
+
+\textbf{\textit{Правило за разделяне}} --- ако $X \rightarrow YZ$, то $X \rightarrow Y$ и $X \rightarrow Z$
+
+$$X \rightarrow Y, Z \iff X \rightarrow Y \text{ и } X \rightarrow Z$$
+
+\textbf{\textit{Правило за комбиниране}} --- ако $X \rightarrow Y$ и $X \rightarrow Z$, то $X \rightarrow YZ$
+
+$$X \rightarrow Y \text{ и } X \rightarrow Z \iff X \rightarrow Y, Z$$
+
+\begin{definition}
+\textbf{\textit{Тривиална ФЗ}} е $X \rightarrow Y$, където $Y \subseteq X$.
+
+\textbf{\textit{Нетривиална ФЗ}} е всяка ФЗ, която не е тривиална.
+\end{definition}
+
+\section{Ключове}
+
+\begin{definition}
+Множество от атрибути $K$ е \textbf{\textit{кандидат-ключ}} на релация $R$, ако:
+\begin{enumerate}
+    \item $K \rightarrow \text{(всички атрибути на R)}$ --- $K$ функционално определя всички останали атрибути
+    \item $K$ е минимално --- няма строго подмножество на $K$ със същото свойство
+\end{enumerate}
+\end{definition}
+
+\begin{definition}
+\textbf{\textit{Суперключ}} е множество от атрибути, което функционално определя всички останали, но не е задължително минимално.
+\end{definition}
+
+\begin{definition}
+При дадена релация могат да съществуват няколко \textbf{\textit{кандидат-ключове}}, а един от тях се избира като \textbf{\textit{първичен ключ}}.
+
+\textbf{\textit{Първични атрибути (prime attributes)}} са атрибути, които принадлежат на поне един кандидат-ключ.
+
+\textbf{\textit{Непървични атрибути (non-prime attributes)}} са атрибути, които не принадлежат на нито един кандидат-ключ.
+\end{definition}
+
+\section{Затваряне на множество атрибути и покритие}
+
+\begin{definition}
+\textbf{\textit{Затваряне}} $X^+$ на множество от атрибути $X$ под дадено множество от ФЗ $F$ е най-голямото множество от атрибути, което се определя функционално от $X$ чрез ФЗ в $F$.
+\end{definition}
+
+\begin{definition}
+\textbf{\textit{Минимално покритие (Canonical cover)}} на множество от ФЗ $F$ е еквивалентно множество $F_c$, което удовлетворява:
+\begin{enumerate}
+    \item В никоя ФЗ от $F_c$ няма излишни атрибути в лявата страна
+    \item Никоя ФЗ в $F_c$ не е излишна, тоест не следва от останалите зависимости в $F_c$
+    \item Множеството $F_c$ е еквивалентно на $F$, тоест $F_c^+ = F^+$
+\end{enumerate}
+На практика минималното покритие често се представя така, че всяка функционална зависимост да има точно един атрибут в дясната страна. То е полезно при намиране на ключове и при синтез на схеми.
+\end{definition}
+
+\subsection{Алгоритъм за определяне на Х+}
+
+Алгоритъмът се прилага итеративно докато не се достигне фиксирана точка:
+
+\begin{enumerate}
+    \item $X^+ := X$
+    \item За всяка ФЗ $A \rightarrow B$ в $F$ (където $B$ може да бъде множество атрибути): ако $A \subseteq X^+$ и $B \not\subseteq X^+$, то $X^+ := X^+ \cup B$
+    \item Повторете стъпка 2 докато $X^+$ не се променя (фиксирана точка)
+\end{enumerate}
+
+\subsection{Пример}
+
+Дадена е релация $R(A, B, C, D)$ с ФЗ: $A \rightarrow B$, $B \rightarrow C$, $AC \rightarrow D$.
+
+Затваряне на $\{A\}$:
+\begin{align*}
+\{A\}^+ &= \{A\} \\
+&= \{A, B\} \quad \text{(защото } A \rightarrow B \text{)} \\
+&= \{A, B, C\} \quad \text{(защото } B \rightarrow C \text{)} \\
+&= \{A, B, C, D\} \quad \text{(защото } AC \rightarrow D \text{)}
+\end{align*}
+
+Следователно $\{A\}$ функционално определя всички атрибути, така че $\{A\}$ е ключ на $R$.
+
+\section{Аксиоми на Армстронг}
+
+\textbf{\textit{Аксиомите на Армстронг}} са набор от правила, по които можем да генерираме нови ФЗ от дадено множество. Те са \textbf{коректни} (не генерират неправилни ФЗ) и \textbf{пълни} (генерират всички възможни ФЗ).
+
+\subsection{Основни аксиоми}
+
+\begin{itemize}
+    \item \textbf{Рефлексивност} --- Ако $Y \subseteq X$, то $X \rightarrow Y$. (Всяко множество функционално определя своите подмножества)
+    
+    \item \textbf{Разширение (Augmentation)} --- Ако $X \rightarrow Y$, то $XZ \rightarrow YZ$ за всяко множество $Z$ атрибути. (Можем да добавим един и същ набор атрибути от двете страни)
+    
+    \item \textbf{Транзитивност} --- Ако $X \rightarrow Y$ и $Y \rightarrow Z$, то $X \rightarrow Z$. (Зависимостите се предават по верига)
+\end{itemize}
+
+\subsection{Производни аксиоми}
+
+\begin{itemize}
+    \item \textbf{Разлагане (Decomposition)} --- Ако $X \rightarrow YZ$, то $X \rightarrow Y$ и $X \rightarrow Z$. (Можем да разделим дясната страна)
+    
+    \item \textbf{Комбинация (Union)} --- Ако $X \rightarrow Y$ и $X \rightarrow Z$, то $X \rightarrow YZ$. (Можем да комбинираме ФЗ с еднакво ляво множество)
+    
+    \item \textbf{Псевдотранзитивност (Pseudotransitivity)} --- Ако $X \rightarrow Y$ и $YZ \rightarrow W$, то $XZ \rightarrow W$.
+\end{itemize}
+
+\subsection{Пример}
+
+Дадени: $A \rightarrow B$ и $BC \rightarrow D$.
+
+По псевдотранзитивност получаваме: $AC \rightarrow D$.
+
+\section{Ограничения и цялостност}
+
+\begin{definition}
+\textbf{\textit{Ограничение}} е условие, което определя кои стойности и комбинации от стойности са допустими в една релация, така че данните да бъдат коректни и консистентни.
+\end{definition}
+
+Основни типове ограничения:
+
+\begin{itemize}
+    \item \textbf{Уникалност} --- Два кортежа не могат да имат еднакви стойности на ключово множество атрибути. Математически това означава, че ключът функционално определя всички атрибути на релацията.
+    
+    \item \textbf{Домейни} --- Всеки атрибут приема стойности само от предварително дефиниран домейн.
+    
+    \item \textbf{Референциална цялост} --- Стойностите на външните ключове трябва да съответстват на стойности на първичен ключ в реферираната релация.
+\end{itemize}
+
+\section{Аномалии при проектиране}
+
+\subsection{Типове аномалии}
+
+\begin{itemize}
+    \item \textbf{Излишества} --- Повторение на информация. Пример: Ако таблица съхранява информация за служителя и неговия отдел, информацията за отдела се повтаря за всеки служител в него.
+    
+    \item \textbf{Аномалии при обновяване} --- При промяна на данни в един кортеж, свързаната информация не се обновява, водещо до неконсистентност.
+    
+    \item \textbf{Аномалии при добавяне} --- Невъзможност да добавим определена информация, без да добавим и друга. Пример: Не можем да добавим нов отдел, ако информацията за отдела се пази само заедно със служители.
+    
+    \item \textbf{Аномалии при изтриване} --- Изтриването на данни води до загуба на друга важна информация. Пример: Изтриването на последния служител от даден отдел може да доведе и до загуба на информацията за самия отдел, ако тя се пази в същата таблица.
+\end{itemize}
+
+\subsection{Декомпозиция за избягване на излишествата}
+
+Когато релация съдържа излишества, можем да я декомпозираме в няколко релации.
+
+\textit{Пример:} Релация $R(A_1, A_2, B_1, B_2)$ с функционална зависимост $B_1 \rightarrow B_2$.
+
+Декомпозиция:
+\begin{itemize}
+    \item $R_1(A_1, A_2, B_1)$ --- съдържа атрибутите, които описват основната същност и връзката към $B_1$
+    \item $R_2(B_1, B_2)$ --- съдържа зависимостта $B_1 \rightarrow B_2$
+\end{itemize}
+
+Първоначалната релация може да се възстанови чрез естествено съединение $R_1 \bowtie R_2$.
+
+\section{Нормални форми}
+
+\subsection{Първа нормална форма (1НФ)}
+
+\begin{definition}
+Релация е в \textbf{\textit{първа нормална форма (1НФ)}}, ако всички атрибути имат атомарни (неделими) стойности.
+\end{definition}
+
+В класическия релационен модел на Код всички релации се приемат за в 1НФ. Това е фундаментално свойство на модела.
+
+\subsection{Втора нормална форма (2НФ)}
+
+\begin{definition}
+Релация е в \textbf{\textit{втора нормална форма (2НФ)}}, ако:
+\begin{enumerate}
+    \item Е в 1НФ
+    \item Няма \textbf{\textit{частична функционална зависимост}} --- тоест никой непървичен атрибут не зависи функционално само от собствено подмножество на някой кандидат-ключ
+\end{enumerate}
+
+Проблемът възниква само при съставни кандидат-ключове.
+\end{definition}
+
+\textit{Пример на нарушение:} Таблица StudentCourse(student\_id, course\_id, instructor\_name), където първичният ключ е (student\_id, course\_id). Ако instructor\_name зависи само от course\_id (подмножество на ключа), то това е частична зависимост и релацията не е в 2НФ.
+
+\textit{Решение:} Декомпозиция:
+\begin{itemize}
+    \item StudentCourse(student\_id, course\_id)
+    \item CourseInstructor(course\_id, instructor\_name)
+\end{itemize}
+
+\subsection{Трета нормална форма (3НФ)}
+
+\begin{definition}
+Релация е в \textbf{\textit{трета нормална форма (3НФ)}}, ако:
+\begin{enumerate}
+    \item Е в 2НФ
+    \item За всяка нетривиална ФЗ $X \rightarrow A$: или $X$ е суперключ на релацията, или $A$ е prime attribute (принадлежи на поне един кандидат-ключ)
+\end{enumerate}
+
+Често това се обяснява интуитивно с отсъствие на транзитивни зависимости на непървични атрибути, но формалната дефиниция е тази по-горе.
+\end{definition}
+
+\textit{Пример на нарушение:} Таблица Employee(emp\_id, name, dept\_id, dept\_name), където първичният ключ е emp\_id. Имаме ФЗ: $\text{emp\_id} \rightarrow \text{name}, \text{dept\_id}$ и $\text{dept\_id} \rightarrow \text{dept\_name}$. Тук dept\_id не е суперключ, а dept\_name е непървичен атрибут, следователно е налице нарушение на 3НФ.
+
+\textit{Решение:} Декомпозиция:
+\begin{itemize}
+    \item Employee(emp\_id, name, dept\_id)
+    \item Department(dept\_id, dept\_name)
+\end{itemize}
+
+\subsection{Нормална форма на Бойс-Код (НФБК)}
+
+\begin{definition}
+Релация е в \textbf{\textit{нормална форма на Бойс-Код (НФБК / BCNF)}}, ако за всяка нетривиална ФЗ $X \rightarrow Y$: $X$ е суперключ на релацията.
+\end{definition}
+
+НФБК е по-строга от 3НФ. Всяка релация в НФБК е и в 3НФ, но не е вярно обратното.
+
+\begin{remark}
+НФБК адресира аномалии, породени от функционални зависимости, но не покрива проблемите, свързани с многозначни зависимости. За тях е необходима 4НФ.
+\end{remark}
+
+\section{Алгоритъм за разложение на релация в НФБК}
+
+Входни данни: Релация $R_0$ с множество от ФЗ $S_0$.
+
+Стандартният алгоритъм за декомпозиция работи както следва:
+
+\begin{enumerate}
+    \item Ако $R_0$ е в НФБК, връщаме $R_0$
+    
+    \item В противен случай намираме ФЗ $X \rightarrow Y$ в $S_0$, която нарушава НФБК (т.е. $X$ не е суперключ)
+    
+    \item Дефинираме $R_1 = X \cup Y$ и $R_2 = R_0 \setminus (Y \setminus X)$
+    
+    \item Проектираме ФЗ върху $R_1$ и $R_2$, тоест разглеждаме само онези зависимости от $S_0^+$, чиито атрибути са изцяло в съответната релация
+    
+    \item Рекурсивно разлагаме и $R_1$ и $R_2$
+    
+    \item Връщаме унията на получените релации
+\end{enumerate}
+
+\subsection{Пример}
+
+Дадена релация: $R(A, B, C, D)$ с ФЗ: $AB \rightarrow C$, $C \rightarrow D$, $D \rightarrow A$.
+
+\textit{Кандидат-ключове:} Проверяваме, че $(B, C)^+ = \{B, C, D, A\}$ по $C \rightarrow D$ и $D \rightarrow A$, а $(B, D)^+ = \{B, D, A, C\}$ по $D \rightarrow A$ и $AB \rightarrow C$. Следователно $\{B, C\}$ и $\{B, D\}$ са кандидат-ключове.
+
+ФЗ $C \rightarrow D$ нарушава НФБК (защото $C$ не е суперключ).
+
+$C^+ = \{C, D, A\}$
+
+Разложение:
+\begin{itemize}
+    \item $R_1(C, D, A)$ с ФЗ: $C \rightarrow D$, $D \rightarrow A$
+    \item $R_2(B, C)$ с ФЗ: (нито една нетривиална)
+\end{itemize}
+
+За $R_1(C, D, A)$: ФЗ $D \rightarrow A$ нарушава НФБК.
+
+$D^+ = \{D, A\}$
+
+Разложение:
+\begin{itemize}
+    \item $R_{1a}(D, A)$
+    \item $R_{1b}(C, D)$
+\end{itemize}
+
+Финално: $\{(D, A), (C, D), (B, C)\}$
+
+\begin{theorem}
+Разложението, получено от този алгоритъм, е съединение без загуба (loss-less decomposition).
+\end{theorem}
+
+\section{Съединение без загуба}
+
+\begin{definition}
+\textbf{\textit{Съединение без загуба (Lossless join)}} е декомпозиция на релация $R$ в релации $R_1, \ldots, R_m$, такава че $R = R_1 \bowtie R_2 \bowtie \cdots \bowtie R_m$.
+\end{definition}
+
+Това значи, че можем да възстановим оригиналната релация от компонентите.
+
+\begin{theorem}
+(За бинарна декомпозиция) Декомпозиция на $R(X, Y, Z)$ на $R_1(X, Y)$ и $R_2(X, Z)$ е съединение без загуба, ако и само ако $X \rightarrow Y$ или $X \rightarrow Z$ (т.е. общите атрибути функционално определят поне един от компонентите).
+\end{theorem}
+
+\begin{definition}
+Нека релацията $R$ е разложена в $R_1, \ldots, R_n$, а $F_i$ е проекцията на $F$ върху $R_i$. \textbf{\textit{Запазване на зависимости (dependency preservation)}} е налице, ако
+$$
+(F_1 \cup F_2 \cup \cdots \cup F_n)^+ = F^+.
+$$
+Тоест всички зависимости от първоначалната схема могат да се проверяват чрез зависимостите в отделните компоненти на разложението.
+\end{definition}
+
+\textit{Забележка:} Съединение без загуба НЕ гарантира запазване на зависимостите. Понякога е нужен компромис между съединението без загуба и запазване на зависимостите.
+
+\section{Многозначни зависимости}
+
+\begin{definition}
+\textbf{\textit{Многозначна зависимост (МЗ)}} $X \twoheadrightarrow Y$ на релация $R$ означава: за всеки две кортежи $t_1, t_2 \in R$, които съвпадат по атрибутите на $X$, съществуват кортежи $t_3, t_4 \in R$ такива, че:
+
+\begin{itemize}
+    \item $t_3[X] = t_4[X] = t_1[X] = t_2[X]$
+    \item $t_3[Y] = t_1[Y]$ и $t_3[R \setminus (X \cup Y)] = t_2[R \setminus (X \cup Y)]$
+    \item $t_4[Y] = t_2[Y]$ и $t_4[R \setminus (X \cup Y)] = t_1[R \setminus (X \cup Y)]$
+\end{itemize}
+\end{definition}
+
+\textit{Интуиция:} Стойностите на $Y$ са независими от атрибутите извън $X \cup Y$ (при фиксиран $X$).
+
+\subsection{Пример}
+
+Таблица: CourseInstructor(course, instructor, textbook)
+
+Ако един курс има няколко инструктора и няколко учебника, които са независими един от друг, то:
+\begin{itemize}
+    \item course $\twoheadrightarrow$ instructor
+    \item course $\twoheadrightarrow$ textbook
+\end{itemize}
+
+Пример данни:
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+course & instructor & textbook \\
+\hline
+CS101 & John & BookA \\
+CS101 & John & BookB \\
+CS101 & Mary & BookA \\
+CS101 & Mary & BookB \\
+\hline
+\end{tabular}
+\end{center}
+
+За кортежите (CS101, John, BookA) и (CS101, Mary, BookB):
+\begin{itemize}
+    \item Съвпадат по course
+    \item Трябва да съществуват (CS101, John, BookB) и (CS101, Mary, BookA) --- и те съществуват!
+\end{itemize}
+
+\subsection{Свойства на МЗ}
+
+\begin{itemize}
+    \item \textbf{Всяка ФЗ е МЗ:} Ако $X \rightarrow Y$, то $X \twoheadrightarrow Y$
+    
+    \item \textbf{Комплементарност:} Ако $X \twoheadrightarrow Y$, то $X \twoheadrightarrow (R \setminus (X \cup Y))$
+\end{itemize}
+
+\begin{remark}
+За разлика от ФЗ, правилата за работа с МЗ са различни и по-сложни.
+\end{remark}
+
+\section{Четвърта нормална форма (4НФ)}
+
+\begin{definition}
+Релация е в \textbf{\textit{четвърта нормална форма (4НФ)}}, ако:
+\begin{enumerate}
+    \item Е в НФБК
+    \item За всяка нетривиална МЗ $X \twoheadrightarrow Y$: $X$ е суперключ на релацията
+\end{enumerate}
+\end{definition}
+
+4НФ елиминира аномалиите, причинени от многозначни зависимости.
+
+\subsection{Пример на нарушение на 4НФ}
+
+Таблица: StudentHobbyLanguage(student, hobby, language)
+
+Ако един студент има няколко хобита и говори няколко езика независимо един от друг, имаме МЗ:
+\begin{itemize}
+    \item student $\twoheadrightarrow$ hobby
+    \item student $\twoheadrightarrow$ language
+\end{itemize}
+
+В тази релация един студент може да участва в няколко кортежа с различни хобита и различни езици, така че student сам по себе си не е суперключ. Следователно тези многозначни зависимости нарушават 4НФ.
+
+\textit{Решение:} Декомпозиция:
+\begin{itemize}
+    \item StudentHobby(student, hobby)
+    \item StudentLanguage(student, language)
+\end{itemize}
+
+\subsection{Пример данни}
+
+Оригинална таблица:
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+student & hobby & language \\
+\hline
+Alice & Reading & English \\
+Alice & Reading & French \\
+Alice & Swimming & English \\
+Alice & Swimming & French \\
+Bob & Gaming & German \\
+\hline
+\end{tabular}
+\end{center}
+
+Декомпозирани таблици:
+
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+student & hobby \\
+\hline
+Alice & Reading \\
+Alice & Swimming \\
+Bob & Gaming \\
+\hline
+\end{tabular}
+\qquad
+\begin{tabular}{|c|c|}
+\hline
+student & language \\
+\hline
+Alice & English \\
+Alice & French \\
+Bob & German \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{Сравнение на нормални форми}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Нормална форма} & \textbf{Условие} & \textbf{Решава} \\
+\hline
+1НФ & Атомарни стойности & Повтарящи се групи \\
+\hline
+2НФ & Няма частична зависимост & Частична зависимост \\
+\hline
+3НФ & Няма транзитивна зависимост & Транзитивна зависимост \\
+\hline
+НФБК & Всяка ФЗ: $X$ е суперключ & Елиминира повечето аномалии от ФЗ \\
+\hline
+4НФ & Всяка МЗ: $X$ е суперключ & Елиминира аномалиите, породени от МЗ \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{FlushLeft}
+
+\end{document}
