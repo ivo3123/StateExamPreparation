@@ -1,0 +1,455 @@
+\documentclass{scrartcl}
+\usepackage{graphicx}
+
+% for cyrillic and Bulgarian language
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[bulgarian]{babel}
+
+% math packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cancel}
+
+\usepackage{ragged2e}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    columns=fullflexible
+}
+
+\lstset{style=mystyle}
+
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+
+\newtheorem{definition}{Дефиниция}
+\newtheorem{theorem}{Теорема}
+\newtheorem{remark}{Забележка}
+
+\title{XML - структуриране, валидация, обработка и представяне на документно съдържание}
+\author{Ивайло Андреев + chat gpt 5.4, 5.5, gemini 3 flash}
+\date{9 май 2026}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\begin{FlushLeft}
+
+\section{Добре-структуриран XML}
+
+XML (\textit{eXtensible Markup Language}) е метаезик за описание на структурирани данни и документи. Основната идея е съдържанието да се представя чрез ясно означени елементи, които са едновременно машинно обработваеми и разбираеми за човека.
+
+\subsection{Основни концепции}
+
+\begin{definition}
+\textbf{Таг} е синтактична конструкция от вида \texttt{<name>} или \texttt{</name>}, с която се отбелязва начало или край на елемент.
+\end{definition}
+
+\begin{definition}
+\textbf{Елемент} е логическа единица в XML документа, съставена от отварящ таг, съдържание и затварящ таг, например \texttt{<person>Ivan</person>}.
+\end{definition}
+
+\begin{definition}
+\textbf{Атрибут} е двойка от име и стойност, записана в отварящия таг на елемента, например \texttt{id="42"}. Стойността на атрибута винаги се поставя в кавички.
+\end{definition}
+
+В началото на документа обикновено стои XML декларация, например:
+
+\begin{lstlisting}[caption=XML declaration example]
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+\end{lstlisting}
+
+\subsection{XML йерархии}
+
+XML документът има дървовидна структура:
+
+\begin{itemize}
+    \item съществува точно един коренов елемент;
+    \item всеки елемент може да има деца, родител и братя;
+    \item елементите образуват логическа и физическа структура на документа.
+\end{itemize}
+
+Логическата структура описва отношенията между елементите, а физическата структура описва от кои единици (entities, външни ресурси) е съставен документът.
+
+\subsection{Синтактични правила за добре-структуриран XML}
+
+За да бъде един XML документ добре структуриран (\textit{well-formed}), трябва да са изпълнени следните условия:
+
+\begin{itemize}
+    \item всеки отварящ таг има съответен затварящ таг или е самозатварящ се;
+    \item елементите са правилно вложени и не се застъпват;
+    \item имената на елементите са чувствителни към регистъра;
+    \item документът има точно един коренов елемент;
+    \item специалните символи \texttt{<} и \texttt{\&} се екранират чрез entities, например \texttt{\&lt;} и \texttt{\&amp;}.
+\end{itemize}
+
+Важно е да се различават понятията \textit{well-formed} и \textit{valid}. Един XML документ е \textbf{well-formed}, ако спазва синтактичните правила на XML. Един XML документ е \textbf{valid}, ако освен това е well-formed и удовлетворява външна формална спецификация, например DTD или XML Schema. Това е класическо разграничение: well-formedness е синтактична коректност, а validity е съответствие със схема.
+
+\begin{lstlisting}[caption=Well-formed XML example]
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog>
+    <book id="b1">
+        <title>XML Fundamentals</title>
+        <author>Alice</author>
+    </book>
+    <book id="b2">
+        <title>XPath in Practice</title>
+        <author>Bob</author>
+    </book>
+</catalog>
+\end{lstlisting}
+
+\subsection{Пространства от имена (Namespaces)}
+
+\begin{definition}
+\textbf{XML пространство от имена} е механизъм за избягване на конфликти между елементи и атрибути с еднакви имена, но различен смисъл.
+\end{definition}
+
+То се задава чрез атрибута \texttt{xmlns}. Често се използва префикс, който се асоциира с URI:
+
+\begin{lstlisting}[caption=Namespace example]
+<root xmlns:h="http://example.org/html"
+      xmlns:f="http://example.org/furniture">
+    <h:table>
+        <h:tr><h:td>Cell</h:td></h:tr>
+    </h:table>
+    <f:table>
+        <f:name>Desk</f:name>
+    </f:table>
+</root>
+\end{lstlisting}
+
+Префиксите като \texttt{h} и \texttt{f} са само локални имена в документа. Реалната идентичност на пространството от имена идва от URI. URI не е задължително да сочи към реален ресурс в интернет; той играе ролята на уникален идентификатор.
+
+\section{XML валидация чрез DTD}
+
+DTD (\textit{Document Type Definition}) описва допустимата структура на XML документ: какви елементи могат да се срещат, в какъв ред, с какви атрибути и с каква кратност.
+
+\subsection{Цели на валидирането}
+
+Валидацията има следните цели:
+
+\begin{itemize}
+    \item проверка дали документът следва предварително зададена структура;
+    \item осигуряване на съвместим обмен на данни между системи;
+    \item повторна употреба на една и съща структурна дефиниция за много документи.
+\end{itemize}
+
+Добре-структурираният документ е синтактично коректен, а валидният документ е добре-структуриран и допълнително удовлетворява дадена DTD или XML Schema.
+
+\subsection{DTD структура и синтаксис}
+
+DTD може да бъде:
+
+\begin{itemize}
+    \item \textbf{вътрешна} --- дефинирана в самия XML документ;
+    \item \textbf{външна} --- записана в отделен файл и реферирана от XML документа.
+\end{itemize}
+
+Пример за вътрешна DTD декларация:
+
+\begin{lstlisting}[caption=Internal DTD declaration example]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE catalog [
+    <!ELEMENT catalog (book+)>
+    <!ELEMENT book (title, author)>
+    <!ATTLIST book id ID #REQUIRED>
+]>
+<catalog>
+    <book id="b1">
+        <title>XML</title>
+        <author>Alice</author>
+    </book>
+</catalog>
+\end{lstlisting}
+
+Пример за външна DTD декларация:
+
+\begin{lstlisting}[caption=External DTD declaration example]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE catalog SYSTEM "catalog.dtd">
+<catalog>
+    <book id="b1">
+        <title>XML</title>
+        <author>Alice</author>
+    </book>
+</catalog>
+\end{lstlisting}
+
+Основните DTD декларации са:
+
+\begin{itemize}
+    \item \texttt{<!ELEMENT ...>} --- описание на допустимото съдържание на елемент;
+    \item \texttt{<!ATTLIST ...>} --- описание на атрибутите на елемент;
+    \item \texttt{<!ENTITY ...>} --- описание на entities.
+\end{itemize}
+
+Често използвани модели на съдържание са:
+
+\begin{itemize}
+    \item \texttt{EMPTY} --- празен елемент;
+    \item \texttt{ANY} --- произволно съдържание;
+    \item \texttt{(\#PCDATA)} --- текстово съдържание.
+\end{itemize}
+
+Операторите за кратност са:
+
+\begin{itemize}
+    \item \texttt{?} --- нула или един път;
+    \item \texttt{*} --- нула или повече пъти;
+    \item \texttt{+} --- един или повече пъти.
+\end{itemize}
+
+\begin{lstlisting}[caption=DTD example]
+<!ELEMENT catalog (book+)>
+<!ELEMENT book (title, author, year?)>
+<!ATTLIST book id ID #REQUIRED>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT author (#PCDATA)>
+<!ELEMENT year (#PCDATA)>
+\end{lstlisting}
+
+При атрибутите често се използват типовете \texttt{CDATA}, \texttt{ID}, \texttt{IDREF} и ограниченията \texttt{\#REQUIRED}, \texttt{\#IMPLIED}, \texttt{\#FIXED}.
+
+DTD е полезна за базово структурно валидиране, но има съществени ограничения: не поддържа богати типове данни като числа и дати и няма естествена пълна поддръжка за namespaces. Именно това е една от основните причини XML Schema да се използва като по-мощен наследник на DTD.
+
+\section{XML валидация чрез XML Schema}
+
+XML Schema (XSD) е по-мощен език за описание на XML структури от DTD. За разлика от DTD, самата схема е XML документ и поддържа богата типова система.
+
+\subsection{Спецификации и типове данни}
+
+XSD предлага:
+
+\begin{itemize}
+    \item примитивни типове като \texttt{string}, \texttt{boolean}, \texttt{decimal}, \texttt{date};
+    \item производни типове като \texttt{integer}, \texttt{long}, \texttt{language}, \texttt{IDREF};
+    \item потребителски типове, създадени чрез ограничаване или разширяване на съществуващи типове.
+\end{itemize}
+
+\subsection{Фасети}
+
+\begin{definition}
+\textbf{Фасети} са ограничения върху множеството допустими стойности на даден тип.
+\end{definition}
+
+Примери за фасети са:
+
+\begin{itemize}
+    \item \texttt{length}, \texttt{minLength}, \texttt{maxLength};
+    \item \texttt{minInclusive}, \texttt{maxInclusive};
+    \item \texttt{pattern};
+    \item \texttt{enumeration}.
+\end{itemize}
+
+Кратък пример: чрез \texttt{enumeration} можем да ограничим стойността на атрибут или елемент до краен списък, например \texttt{small}, \texttt{medium}, \texttt{large}. Чрез \texttt{pattern} можем да наложим формат, например пощенски код от точно 4 цифри.
+
+\subsection{Структури в XML Schema}
+
+Важно е да се прави разлика между \textbf{simple content} и \textbf{complex content}. При simple content елементът съдържа само текстова стойност и няма вложени елементи. При complex content елементът може да съдържа други елементи и/или атрибути.
+
+Основни конструкции в XSD са:
+
+\begin{itemize}
+    \item \texttt{<xs:element>} и \texttt{<xs:attribute>} --- декларации на елементи и атрибути;
+    \item \texttt{<xs:simpleType>} --- тип за simple content, тоест само текстова стойност;
+    \item \texttt{<xs:complexType>} --- тип за complex content, тоест вложени елементи и/или атрибути;
+    \item \texttt{<xs:sequence>} --- подредена последователност;
+    \item \texttt{<xs:all>} --- всички изброени елементи, без задължителен ред;
+    \item \texttt{<xs:choice>} --- избор на един от няколко възможни елемента.
+\end{itemize}
+
+\begin{lstlisting}[caption=XSD example]
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="book">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="title" type="xs:string"/>
+                <xs:element name="author" type="xs:string"/>
+                <xs:element name="year" type="xs:integer" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:ID" use="required"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
+\end{lstlisting}
+
+\subsection{Сравнение между DTD и XML Schema}
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Характеристика} & \textbf{DTD} & \textbf{XML Schema} \\
+\hline
+Синтаксис & Собствен синтаксис & XML синтаксис \\
+\hline
+Типове данни & Силно ограничени & Богата типова система \\
+\hline
+Namespaces & Ограничена поддръжка & Пълна поддръжка \\
+\hline
+Ограничения & По-базови & Фасети и сложни правила \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{XSLT и XPath}
+
+Технологиите XSLT и XPath се използват за избор, трансформация и представяне на XML данни.
+
+\subsection{XSLT}
+
+XSLT (\textit{eXtensible Stylesheet Language Transformations}) е език за трансформиране на XML документи в други формати, например HTML, текст или друг XML документ.
+
+Обработката в XSLT е \textbf{template-based} и декларативна: описваме шаблони, които казват какви възли да бъдат разпознати и какъв резултат да се конструира, вместо да пишем императивен алгоритъм стъпка по стъпка.
+
+Основни XSLT конструкции са:
+
+\begin{itemize}
+    \item \texttt{<xsl:template>} --- шаблон за обработка на възли;
+    \item \texttt{<xsl:value-of>} --- извличане на стойност;
+    \item \texttt{<xsl:for-each>} --- обхождане на множество възли;
+    \item \texttt{<xsl:apply-templates>} --- прилагане на шаблони върху децата на текущия възел.
+\end{itemize}
+
+\begin{lstlisting}[caption=XSLT example]
+<xsl:stylesheet version="1.0"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:template match="/catalog">
+        <html>
+            <body>
+                <ul>
+                    <xsl:for-each select="book">
+                        <li><xsl:value-of select="title"/></li>
+                    </xsl:for-each>
+                </ul>
+            </body>
+        </html>
+    </xsl:template>
+</xsl:stylesheet>
+\end{lstlisting}
+
+XSLT позволява ясно разделяне между данни и представяне: XML пази съдържанието, а XSLT описва как то да бъде визуализирано или преобразувано.
+
+\subsection{XPath}
+
+\begin{definition}
+\textbf{XPath} е език за адресиране и навигация в XML документ, който разглежда документа като дърво от възли.
+\end{definition}
+
+XPath използва синтаксис, подобен на файлови пътища. Основни оператори са:
+
+\begin{itemize}
+    \item \texttt{/} --- абсолютен път от корена;
+    \item \texttt{//} --- търсене на възли навсякъде в документа;
+    \item \texttt{@} --- избор на атрибут;
+    \item \texttt{..} --- избор на родителски възел.
+\end{itemize}
+
+Особено важни са и \textbf{предикатите}, с които се филтрират възли:
+
+\begin{itemize}
+    \item \texttt{[1]} --- първият елемент от избраното множество;
+    \item \texttt{[last()]} --- последният елемент;
+    \item \texttt{[price > 30]} --- елементи, за които вложеният елемент \texttt{price} има стойност над 30.
+\end{itemize}
+
+Примери за XPath изрази:
+
+\begin{itemize}
+    \item \texttt{/catalog/book/title} --- всички заглавия на книги в корена \texttt{catalog};
+    \item \texttt{//book[@id='b1']} --- книга с атрибут \texttt{id='b1'};
+    \item \texttt{//author} --- всички елементи \texttt{author} в документа;
+    \item \texttt{/catalog/book[1]} --- първата книга в каталога;
+    \item \texttt{//book[last()]} --- последната книга в документа;
+    \item \texttt{//book[price > 30]} --- всички книги с цена над 30.
+\end{itemize}
+
+\section{Обработка на XML: DOM и SAX}
+
+\subsection{DOM}
+
+DOM (\textit{Document Object Model}) е \textbf{tree-based API}: представя целия XML документ като дърво в паметта.
+
+Основни интерфейси в DOM са:
+
+\begin{itemize}
+    \item \texttt{Node} --- базов интерфейс за възел;
+    \item \texttt{Document} --- кореновият обект на документа;
+    \item \texttt{Element} --- елементен възел;
+    \item \texttt{Attr} --- атрибутен възел;
+    \item \texttt{Text} --- текстов възел.
+\end{itemize}
+
+Предимството на DOM е, че позволява произволен достъп, навигация и модификация на документа. Недостатък е по-високата консумация на памет при големи файлове.
+
+\subsection{SAX}
+
+SAX (\textit{Simple API for XML}) е \textbf{event-driven streaming API}: XML документът се чете последователно, а при срещане на отварящ таг, затварящ таг, текст или грешка парсерът генерира събития.
+
+Основни интерфейси в SAX са:
+
+\begin{itemize}
+    \item \texttt{XMLReader};
+    \item \texttt{ContentHandler};
+    \item \texttt{ErrorHandler}.
+\end{itemize}
+
+Приложението обработва тези събития чрез обработчици на събития като \texttt{ContentHandler} и \texttt{ErrorHandler}. SAX е особено подходящ за много големи документи, защото не съхранява цялото дърво в паметта.
+
+\subsection{Сравнение между DOM и SAX}
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Характеристика} & \textbf{DOM} & \textbf{SAX} \\
+\hline
+Модел & Дърво в паметта & Поток от събития \\
+\hline
+Памет & Висока консумация & Ниска консумация \\
+\hline
+Достъп & Произволен & Последователен \\
+\hline
+Модификация & Удобна & Ограничена \\
+\hline
+Подходящ за & Сложни промени & Много големи файлове \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{Обобщение}
+
+XML е универсален стандарт за структуриране и обмен на документно съдържание. Добре-структурираният XML осигурява синтактична коректност, DTD и XML Schema осигуряват валидиране спрямо формална спецификация, XSLT и XPath позволяват трансформация и навигация, а DOM и SAX дават два различни програмни модела за обработка на документи според нуждите на приложението.
+
+\end{FlushLeft}
+
+\end{document}
