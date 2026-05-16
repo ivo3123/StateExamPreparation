@@ -1,0 +1,512 @@
+\documentclass{scrartcl}
+\usepackage{graphicx}  % required for inserting images
+
+% for cyrillic and Bulgarian language
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[bulgarian]{babel}
+
+% math packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cancel}
+
+\usepackage{ragged2e}  % adds FlushLeft
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    language=Octave,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,
+    captionpos=b,
+    keepspaces=false,                 
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    columns=fullflexible,
+}
+
+\lstset{style=mystyle}
+
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+
+\newtheorem{theorem}{Теорема}
+\newtheorem{definition}{Дефиниция}
+\newtheorem{statement}{Твърдение}
+
+\title{Диференциални уравнения - линейни уравнения}
+\author{Ивайло Андреев}
+\date{15 май 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\begin{FlushLeft}
+
+В цялата тема важи, че $\Delta$ е област, тоест отворено и свързано множество.
+
+\section{Линейно диференциалното уравнение}
+
+\begin{definition}
+(Комплекснозначна функция)
+
+Комплекснозначна функция наричаме функция от вида:
+
+$$g(t) = u(t) + \mathrm{i}v(t)$$
+
+където $u: \Delta \rightarrow \mathbb{R}$ е реалната част на $g$ и $v: \Delta \rightarrow \mathbb{R}$ е имагинерната част на $g$.
+\end{definition}
+
+\begin{definition}
+(Непрекъсната комплекснозначна функция)
+
+Нека $g(t) = u(t) + \mathrm{i}v(t)$ е комплекснозначна функция.
+
+Тогава $g(t)$ е непрекъсната, ако функциите $u(t)$ и $v(t)$ са непрекъснати в $\Delta$.
+\end{definition}
+
+\begin{definition}
+(Линейно уравнение от ред $n$)
+
+Нека $y(t)$ е $n$ пъти диференцируема, тоест $y \in C^n(\Delta)$.
+
+Линейно обикновено диференциално уравнение от ред $n$ за $y(t)$ наричаме уравнение от вида:
+
+\begin{equation}\label{eq:general_linear}
+    \sum_{i=0}^n a_i(t)y^{(i)} = f(t)
+\end{equation}
+
+където $a_0(t), a_1(t), \dots, a_n(t)$ и $f(t)$ са непрекъснати комплекснозначни функции и $a_n(t) \ne 0 \; \forall t \in \Delta$.
+\end{definition}
+
+Можем без ограничение на общността да считаме, че $a_n(t) \equiv 1$, защото $a_n(t) \ne 0 \; \forall t \in \Delta$ и можем да разделим на $a_n(t)$.
+
+\section{Теорема за съществуване и единственост}
+
+\begin{theorem}\label{th:unique_sol}
+(Теорема за съществуване и единственост)
+
+Нека е дадено линейното уравнение \eqref{eq:general_linear}.
+Нека $t_0 \in \Delta$ и $\eta_0, \eta_1, \dots, \eta_{n-1} \in \mathbb{C}$.
+
+Тогава следната задача на Коши:
+
+$$
+\begin{cases}
+\displaystyle \sum_{i=0}^n a_i(t)y^{(i)} = f(t) \\
+y(t_0) = \eta_0 \\
+y'(t_0) = \eta_1 \\
+\vdots \\
+y^{(n-1)}(t_0) = \eta_{n-1} \\
+\end{cases}
+$$
+
+има единствено решение и то е дефинирано в целия интервал $\Delta$.
+\end{theorem}
+
+\begin{definition}
+(Хомогенно линейно уравнение от ред $n$)
+
+Наричаме уравнението \eqref{eq:general_linear} хомогенно, ако $f(t) \equiv 0$. Иначе го наричаме нехомогенно.
+\end{definition}
+
+Хомогенното линейно уравнение има вида
+
+\begin{equation}\label{eq:homog}
+    \sum_{i=0}^n a_i(t)y^{(i)} = 0
+\end{equation}
+
+\begin{definition}
+(Уравнение с постоянни коефициенти)
+
+Казваме, че уравнението \eqref{eq:general_linear} е с постоянни коефициенти, ако функциите $a_0(t), a_1(t), \dots, a_n(t)$ са константни.
+\end{definition}
+
+\section{Критерий за линейна независимост на решения}
+
+\begin{definition}
+(Линейна независимост на система от функции)
+
+Системата от функции $y_1(t), \dots, y_n(t)$ се нарича линейно независима в $\Delta$, ако от това, че
+
+$$\sum_{j=1}^n C_jy_j(t) = 0 \quad \forall t \in \Delta$$
+
+следва, че
+
+$$(C_1, \dots, C_n) = (0, \dots, 0)$$
+\end{definition}
+
+\begin{definition}
+(Линейна зависимост на система от функции)
+
+Системата от функции $y_1(t), \dots, y_n(t)$ се нарича линейно зависима в $\Delta$, ако
+
+$$\sum_{j=1}^n C_jy_j(t) = 0 \quad \forall t \in \Delta$$
+
+и
+
+$$(C_1, \dots, C_n) \ne (0, \dots, 0)$$
+\end{definition}
+
+\begin{definition}
+(Детерминанта на Вронски)
+
+Нека $y_1, \dots, y_n \in C^{(n-1)}(\Delta)$.
+
+Детерминанта на Вронски за функциите $y_1, \dots, y_n$ наричаме:
+
+$$
+W(y_1, \dots, y_n)(t) = 
+\begin{vmatrix}
+y_1(t) & y_2(t) & \dots & y_n(t) \\
+y_1'(t) & y_2'(t) & \dots & y_n'(t) \\
+\vdots & \vdots & \ddots & \vdots \\
+y_1^{(n-1)}(t) & y_2^{(n-1)}(t) & \dots & y_n^{(n-1)}(t)
+\end{vmatrix}
+$$
+\end{definition}
+
+Стойността на детерминантата на Вронски в точка $t_0$ ще бележим с $W(t_0)$.
+
+\begin{theorem}
+(Критерий за линейна независимост на система от функции)
+
+Нека $y_1, \dots, y_n \in C^{(n-1)}(\Delta)$ са решение на хомогенното линейно уравнение \eqref{eq:homog} и нека $W$ е тяхната детерминанта на Вронски.
+
+Тогава ако $\exists t_0 \in \Delta : W(t_0) \ne 0$, то системата от функции $y_1, \dots, y_n$ е линейно независима в $\Delta$.
+\end{theorem}
+
+\textbf{Доказателство:}
+
+Нека $C_1, \dots, C_n \in \mathbb{C}$ са такива константи, за които е изпълнено следното равенство:
+
+$$\sum_{j=1}^n C_jy_j(t) = 0$$
+
+Ще покажем, че $(C_1, \dots, C_n) = (0, \dots, 0)$, от което ще следва, че системата от функциите е линейно независима в $\Delta$.
+
+Диференцираме последователно $n-1$ пъти и получаваме следната система.
+
+$$
+\begin{cases}
+    C_1y_1(t) + \dots + C_ny_n(t) = 0\\
+    C_1y_1'(t) + \dots + C_ny_n'(t) = 0\\
+    \vdots\\
+    C_1y_1^{(n-1)}(t) + \dots + C_ny_n^{(n-1)}(t) = 0\\
+\end{cases}
+$$
+
+При $t = t_0$ получаваме следното матрично уравнение:
+
+$$
+\begin{pmatrix}
+    y_1(t_0) & y_2(t_0) & \dots & y_n(t_0) \\
+    y_1'(t_0) & y_2'(t_0) & \dots & y_n'(t_0) \\
+    \vdots & \vdots & \ddots & \vdots \\
+    y_1^{(n-1)}(t_0) & y_2^{(n-1)}(t_0) & \dots & y_n^{(n-1)}(t_0)
+\end{pmatrix}
+\begin{pmatrix}
+    C_1\\
+    C_2\\
+    \vdots\\
+    C_n
+\end{pmatrix}
+=
+\begin{pmatrix}
+    0\\
+    0\\
+    \vdots\\
+    0
+\end{pmatrix}
+$$
+
+Детерминантата на матрицата вляво е детерминантата на Вронски, която по условие е ненулева в точката $t_0$ ($W(t_0) \ne 0$).
+
+Така системата има единствено решение при $(C_1, \dots, C_n) = (0, \dots, 0)$, от което следва, че дадената система от функции е линейно независима в $\Delta$.
+
+\begin{theorem}
+(Критерий за линейна зависимост на система от функции)
+
+Нека $y_1, \dots, y_n \in C^{(n-1)}(\Delta)$ са решение на хомогенното линейно уравнение \eqref{eq:homog} и нека $W$ е тяхната детерминанта на Вронски.
+
+Тогава ако $\exists t_0 \in \Delta : W(t_0) = 0$, то системата от функции $y_1, \dots, y_n$ е линейно зависима в $\Delta$.
+\end{theorem}
+
+\section{Линейно пространство}
+
+\begin{definition}
+(Фундаментална система решения)
+
+Решенията на хомогенното линейно уравнение \eqref{eq:homog} наричаме фундаментална система решения (ФСР) в $\Delta$, ако те са линейно независими.
+\end{definition}
+
+\begin{theorem}
+(Критерий за фундаментална система решения)
+
+Нека $y_1(t), \dots, y_n(t)$ са решения на хомогенното уравнение \eqref{eq:homog} в $\Delta$ и нека $W$ е тяхната детерминанта на Вронски.
+
+Тогава следните твърдения са еквивалентни:
+
+\begin{enumerate}
+    \item $\exists t_0 \in \Delta : W(t_0) \ne 0$
+    \item $y_1(t), \dots, y_n(t)$ образуват ФСР в $\Delta$ за уравнението
+    \item $W(t) \ne 0 \; \forall t \in \Delta$
+\end{enumerate}
+\end{theorem}
+
+\begin{theorem}
+(Линейно пространство от решения)
+
+Множеството от всички решения на хомогенното линейно уравнение \eqref{eq:homog} образува линейно пространство с размерност $n$.
+\end{theorem}
+
+\textbf{Доказателство:}
+
+Нека означим множеството от всички решения на хомогенното уравнение с $M$.
+
+Ще покажем, че $M$ е изоморфно с линейно пространство $\mathbb{C}^n$.
+
+За да говорим за изоморфизъм е необходимо множеството $M$ да е линейно пространство.
+
+\underline{0. $M$ е линейно пространство}
+
+Нека $y_1(t)$ и $y_2(t)$ са решения на хомогенното уравнение и нека $\alpha, \beta \in \mathbb{C}$.
+
+Ще покажем, че $\alpha y_1(t) + \beta y_2(t)$ също е решение.
+
+\begin{align*}
+    \sum_{i=0}^n a_i(\alpha y_1 + \beta y_2)^{(i)} & = \sum_{i=0}^n a_i(\alpha y_1^{(i)} + \beta y_2^{(i)})\\
+    & = \sum_{i=0}^n a_i\alpha y_1^{(i)} + \sum_{i=0}^n a_i \beta y_2^{(i)}\\
+    & = \alpha \sum_{i=0}^n a_i y_1^{(i)} + \beta \sum_{i=0}^n a_i y_2^{(i)}\\
+    & = \alpha \times 0 + \beta \times 0 = 0
+\end{align*}
+
+Показахме, че $M$ е линейно пространство. Остава да покажем, че размерността му е равна на $n$. Ще го покажем, като построим биективно линейно изображение (изоморфизъм).
+
+Нека $H$ е множеството от всички наредени $n$-торки с комплексни числа, които представляват начални условия за линейното уравнение от $n$-ти ред. Нека въведем изображението
+
+$$\psi: M \to H$$
+
+То съпоставя на всяко решение началните му стойности в точката $t_0 \in \Delta$.
+
+Нека $y_0(t)$ е решение на задачата на Коши за уравнението с начални условия $(\eta_0, \dots, \eta_{n-1})$ в точката $t_0$. Тогава
+
+$$\psi(y_0(t)) = (y(t_0), \dots, y^{(n-1)}(t_0)) = (\eta_0, \dots, \eta_{n-1})$$
+
+\underline{1. $\psi$ е линейно изображение}
+
+Нека $y_3(t)$ и $y_4(t)$ са решения на хомогенното уравнение и нека $\gamma, \rho \in \mathbb{C}$.
+
+\begin{align*}
+    \psi(\gamma y_3 + \rho y_4) & = (\gamma y_3(t_0) + \rho y_4(t_0), \dots, \gamma y_3^{(n-1)}(t_0) + \rho y_4^{(n-1)}(t_0))\\
+    & = (\gamma y_3(t_0), \dots, \gamma y_3^{(n-1)}(t_0)) + (\rho y_4(t_0), \dots, \rho y_4^{(n-1)}(t_0))\\
+    & = \gamma(y_3(t_0), \dots, y_3^{(n-1)}(t_0)) + \rho (y_4(t_0), \dots, y_4^{(n-1)}(t_0))\\
+    & = \gamma \psi(y_3) + \rho \psi(y_4)
+\end{align*}
+
+\underline{2. $\psi$ е сюрекция}
+
+От теоремата за съществуване и единственост \ref{th:unique_sol} следва, че за всяка $n$-торка от начални условия съществува единствено решение. Следователно $\psi$ е сюрекция.
+
+\underline{3. $\psi$ е инекция}
+
+От теоремата за съществуване и единственост \ref{th:unique_sol} следва, че за $n$-торката от начални условия $(0, \dots, 0)$ съществува единствено решение, което е нулевото. Оттук $\text{Ker }\psi = \{0\}$. Следователно $\psi$ е инекция.
+
+Тъй като $H \cong \mathbb{C}^n$, то $\dim H = n$.
+Понеже $M \cong H$, получаваме $\dim M = n$.
+
+\begin{statement}\label{st:general_solution}
+(Общо решение на хомогенно уравнение)
+
+Нека е дадено хомогенно уравнение от ред $n$ от вида \eqref{eq:homog}.
+Нека фундаменталната система решения за хомогенното уравнение има вида:
+$$\text{ФСР} = \{\varphi_1(t), \dots, \varphi_n(t)\}$$
+
+Тогава хомогенното уравнение има общо решение от вида:
+
+$$y(t) = y_0(t) = \sum_{j=1}^n C_j \varphi_j(t)$$
+
+където $C_1, \dots, C_n \in \mathbb{C}$.
+\end{statement}
+
+\section{Структура на решения на нехомогенно уравнение}
+
+\begin{definition}
+(Квазиполином)
+
+Нека $\alpha, \beta \in \mathbb{R}$. Нека $k \in \mathbb{N}$ и нека $P_k(t)$ е полином от $k$-та степен.
+
+Тогава квазиполином наричаме функция от един от следните видове:
+
+\begin{enumerate}
+    \item $P_k(t)e^{\alpha t}$
+    \item $P_k(t)e^{\alpha t}\cos{(\beta t)}$
+    \item $P_k(t)e^{\alpha t}\sin{(\beta t)}$
+\end{enumerate}
+\end{definition}
+
+\begin{statement}
+(Частно решение - квазиполином)
+
+Нека е дадено нехомогенно уравнение от вида \eqref{eq:general_linear} с \underline{постоянни коефициенти} и нека $f(t)$ е квазиполином.
+
+Тогава нехомогенното уравнение има частно решение във вид на квазиполином.
+\end{statement}
+
+\begin{statement}
+(Частно решение - метод на Лагранж)
+
+Нека е дадено нехомогенно уравнение от вида \eqref{eq:general_linear} и нека $f(t)$ е произволна непрекъсната функция.
+Нека фундаменталната система решения за \underline{хомогенното} уравнение при $f(t) \equiv 0$ има вида:
+$$\text{ФСР} = \{\varphi_1(t), \dots, \varphi_n(t)\}$$
+
+Тогава нехомогенното уравнение има частно решение от вида:
+
+$$y_1(t) = \sum_{j=1}^n b_j(t) \varphi_j(t)$$
+
+където $b_1(t), \dots, b_n(t) : \Delta \rightarrow \mathbb{C}$ са непрекъснати функции, които удовлетворяват условията:
+
+$$
+\begin{cases}
+    \displaystyle\sum_{j=1}^n b_j'(t)\varphi_j(t) = 0\\
+    \displaystyle\sum_{j=1}^n b_j'(t)\varphi_j'(t) = 0\\
+    \vdots\\
+    \displaystyle\sum_{j=1}^n b_j'(t)\varphi_j^{(n-2)}(t) = 0\\
+    \displaystyle\sum_{j=1}^n b_j'(t)\varphi_j^{(n-1)}(t) = \dfrac{f(t)}{a_n(t)}\\
+\end{cases}
+$$
+\end{statement}
+
+\begin{theorem}
+(Структура на решението на нехомогенно уравнение)
+
+Нека е дадено нехомогенно уравнение от вида \eqref{eq:general_linear}.
+Нека $y_0(t)$ е общо решение за \underline{хомогенното} уравнение при $f(t) \equiv 0$ и нека $y_1(t)$ е частно решение на нехомогенното уравнение.
+
+Тогава общото решение на нехомогенното уравнение има вида:
+
+$$y(t) = y_0(t) + y_1(t)$$    
+\end{theorem}
+
+\section{Алгоритъм за намиране на общо решение на хомогенно уравнение с постоянни коефициенти}
+
+\subsection{Алгоритъм}
+
+Нека е дадено уравнението \eqref{eq:homog} с постоянни реални коефициенти и нека $y(t) \in \mathbb{R}$.
+
+$$\sum_{i=0}^n a_i y^{(i)} = 0$$
+
+На даденото линейно уравнение съответства следният характеристичен полином:
+
+$$P(\lambda) = \sum_{i=0}^n a_i \lambda^i$$
+
+Приравняваме характеристичния полином на $0$.
+
+$$\sum_{i=0}^n a_i \lambda^{i} = 0$$
+
+Получаваме полиномиално уравнение. Тъй като $a_n \ne 0$, характеристичният полином е от степен $n$. Според основната теорема на алгебрата уравнението притежава $n$ на брой комплексни корена, считани с тяхната кратност.
+
+На всеки корен на характеристичното уравнение съответстват решения по следните правила:
+
+\begin{enumerate}
+    \item $\lambda_i \in \mathbb{R}$ е еднократен реален корен:
+    
+    $$\varphi_{\lambda_i}(t) = e^{\lambda_i t}$$
+    
+    \item $\lambda_{i} \in \mathbb{R}$ е $k$-кратен реален корен:
+
+    $$
+    \begin{cases}
+        \varphi_{\lambda_{i_1}}(t) = e^{\lambda_i t}\\
+        \varphi_{\lambda_{i_2}}(t) = te^{\lambda_i t}\\
+        \vdots\\
+        \varphi_{\lambda_{i_k}}(t) = t^{k-1}e^{\lambda_i t}
+    \end{cases}
+    $$
+    
+    \item $\lambda_{i_1, i_2} = \alpha \pm \mathrm{i} \beta\in \mathbb{C}$ е еднократен комплексно спрегнат корен:
+
+    $$
+    \begin{cases}
+        \varphi_{\lambda_{i_1}}(t) = e^{\alpha t}\cos{(\beta t)}\\
+        \varphi_{\lambda_{i_2}}(t) = e^{\alpha t}\sin{(\beta t)}
+    \end{cases}
+    $$
+    
+    \item $\lambda_{i_1, i_2} = \alpha \pm \mathrm{i} \beta\in \mathbb{C}$ е $k$-кратен комплексно спрегнат корен:
+
+    $$
+    \begin{cases}
+        \begin{cases}
+            \varphi_{\lambda_{i_{1, 1}}}(t) = e^{\alpha t}\cos{(\beta t)}\\
+            \varphi_{\lambda_{i_{1, 2}}}(t) = e^{\alpha t}\sin{(\beta t)}
+        \end{cases}\\
+        \begin{cases}
+            \varphi_{\lambda_{i_{2, 1}}}(t) = te^{\alpha t}\cos{(\beta t)}\\
+            \varphi_{\lambda_{i_{2, 2}}}(t) = te^{\alpha t}\sin{(\beta t)}
+        \end{cases}\\
+        \vdots\\
+        \begin{cases}
+            \varphi_{\lambda_{i_{k, 1}}}(t) = t^{k-1}e^{\alpha t}\cos{(\beta t)}\\
+            \varphi_{\lambda_{i_{k, 2}}}(t) = t^{k-1}e^{\alpha t}\sin{(\beta t)}
+        \end{cases}
+    \end{cases}
+    $$
+\end{enumerate}
+
+След прилагане на тези правила формираме фундаментална система решения от базисните функции:
+
+$$\text{ФСР} = \{\varphi_1(t), \dots, \varphi_n(t)\}$$
+
+Според твърдението \ref{st:general_solution} общото решение има вида:
+
+$$y(t) = \sum_{j=1}^n C_j \varphi_j(t)$$
+
+където $C_1, \dots, C_n \in \mathbb{R}$.
+
+\subsection{Пример}
+
+$$y'' - 4y' + 4y = 0$$
+
+На даденото линейно уравнение съответства следният характеристичен полином:
+
+$$P(\lambda) = \lambda^2 -4 \lambda + 4$$
+
+Приравняваме характеристичния полином на $0$.
+
+$$\lambda^2 - 4\lambda + 4 = 0$$
+
+$$(\lambda - 2)^2 = 0$$
+
+Получаваме един двоен реален корен $\lambda_{1,2} = 2$.
+
+$$\text{ФСР }=\lbrace \mathrm{e}^{2t}, \, t\mathrm{e}^{2t} \rbrace$$
+
+Общото решение на хомогенното уравнение $y_0$ е:
+
+$$y = C_1 \mathrm{e}^{2t} + C_2 t\mathrm{e}^{2t}, \quad C_1, \space C_2 \in \mathbb{R}$$
+
+\end{FlushLeft}
+
+\end{document}
