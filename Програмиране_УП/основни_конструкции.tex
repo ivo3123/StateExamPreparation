@@ -1,0 +1,195 @@
+\documentclass{scrartcl}
+\usepackage{graphicx}  % required for inserting images
+
+% for cyrillic and Bulgarian language
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[bulgarian]{babel}
+
+% math packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cancel}
+
+\usepackage{ragged2e}  % adds FlushLeft
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    % caption=Example C++,
+    label={lst:listing-cpp},
+    language=C++,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    keepspaces=true,                 
+    numbers=left,       
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+}
+\lstset{style=mystyle}
+
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+
+\newtheorem{theorem}{Теорема}
+\newtheorem{definition}{Дефиниция}
+
+\title{Увод в програмирането - основни конструкции}
+\author{Ивайло Андреев + gemini 3 Flash, chat GPT 5.4}
+\date{16 май 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\begin{FlushLeft}
+
+\section{Принципи на структурното програмиране}
+Процедурната парадигма служи като основа за разбирането на съвременните подходи и е неизменна част от изучаването на алгоритми и структури от данни. Програмирането може да бъде разделено на две основни парадигми:
+\begin{itemize}
+    \item \textbf{Императивно програмиране:} Описва \textit{как} се изпълнява дадена задача, чрез поредица от инструкции, които променят състоянието на програмата (например чрез променливи и команди за контрол на потока). То включва процедурното и обектно-ориентираното програмиране.
+    \item \textbf{Декларативно програмиране:} Описва \textit{какво} трябва да се постигне, без изрично да се указват стъпките за изпълнение (например функционално програмиране и логическо програмиране).
+\end{itemize}
+
+\textbf{Фундаментална теорема на структурното програмиране (Теорема на Бьом-Якопини):} Всеки алгоритъм може да бъде изразен чрез използването на само три основни управляващи конструкции:
+\begin{enumerate}
+    \item \textbf{Последователност (Sequence):} Инструкциите се изпълняват една след друга в реда, в който са написани.
+    \item \textbf{Разклонение (Selection/Condition):} Избор между два или повече пътя на изпълнение в зависимост от логическо условие.
+    \item \textbf{Цикъл (Iteration/Loop):} Многократно изпълнение на поредица от инструкции, докато дадено условие е изпълнено.
+\end{enumerate}
+Основната цел на структурното програмиране е да направи програмите по-разбираеми, по-лесни за проследяване и модификация, като се избягва използването на неструктурирани преходи като \texttt{goto}.
+
+\section{Управление на изчислителния процес}
+Управлението на изчислителния процес се осъществява чрез инструкции, които определят реда на изпълнение на действията. Програмата се състои от изрази (които пресмятат и връщат стойност) и оператори (които извършват действия). Блок от код се огражда с къдрави скоби \texttt{\{\}}.
+
+\subsection{Условни оператори}
+Условните оператори позволяват разклоняване на логиката. Използват се \texttt{if}, \texttt{if-else} и \texttt{switch} за многозначно разклоняване.
+\begin{lstlisting}
+// Example of conditional statements and basic syntax
+int x = 10;
+if (x > 5) {
+    // Executed if the condition is true
+    x--;
+} else {
+    // Executed if the condition is false
+    x++;
+}
+
+// Inline ternary conditional choice
+int y = (x == 9) ? 1 : 0; 
+
+// Switch selector statement
+switch (y) {
+    case 0:
+        // Handle case 0 block
+        break; // Stop fall-through
+    case 1:
+        // Handle case 1 block
+        break;
+    default:
+        // Optional catch-all block
+        break;
+}
+\end{lstlisting}
+
+\subsection{Оператори за цикъл}
+Циклите осигуряват многократно изпълнение на код. Те се делят на цикли с предусловие (\texttt{while}), цикли с постусловие (\texttt{do-while}) и цикли с брояч (\texttt{for}).
+\begin{lstlisting}
+// 1. Pre-condition loop (evaluates condition before running body)
+int i = 0;
+while (i < 5) {
+    // Loop code statements
+    i++;
+}
+
+// 2. Post-condition loop (guaranteed to execute at least once)
+int j = 0;
+do {
+    // Executes body, then evaluates condition
+    j++;
+} while (j < 5);
+
+// 3. Counter-controlled loop iteration
+for (int k = 0; k < 5; k++) {
+    // Initialization, condition check, and step execution
+}
+\end{lstlisting}
+
+\section{Променливи}
+Променливата е наименувана област от паметта, която съхранява стойност от определен тип. Всяка променлива има адрес, съответстващ на позицията ѝ в паметта.
+
+\subsection{Локални и глобални променливи}
+Основните разлики между променливите се свеждат до техния обхват (видимост) и време на живот:
+\begin{itemize}
+    \item \textbf{Локални променливи:} Дефинират се вътре във функция или блок \texttt{\{\}}. Те се създават при достигане на дефиницията им и се унищожават при излизане от блока (разполагат се в \textbf{Стека}). Видими са само в този блок.
+    \item \textbf{Глобални променливи:} Дефинират се извън всички функции, в началото на файла. Те съществуват през цялото време на изпълнение на програмата (разположени в \textbf{Data/BSS сегмента}) и са достъпни от всяка функция в рамките на файла.
+\end{itemize}
+
+\subsection{Инициализация и оператор за присвояване}
+\begin{itemize}
+    \item \textbf{Оператор за присвояване (\texttt{=}):} Променя текущата стойност на вече съществуваща променлива, като оценява израза отдясно и го записва в паметта на променливата отляво.
+    \item \textbf{Инициализация:} Задаване на начална стойност на променливата в момента на нейното деклариране. Важно е да се отбележи, че неинициализираните локални променливи съдържат произволни данни от паметта (т.нар. "боклук"), което води до грешки и недефинирано поведение, докато глобалните се инициализират автоматично с 0.
+\end{itemize}
+
+\section{Функции и процедури}
+Функцията е самостоятелен блок от код, който решава подзадача и може да бъде извикан многократно. В C++ процедурите се представят като функции с тип на връщане \texttt{void}.
+\begin{itemize}
+    \item \textbf{Формални параметри:} Променливите, изброени в заглавието на функцията.
+    \item \textbf{Фактически параметри (Аргументи):} Реалните стойности или променливи, които се подават в скобите при извикването.
+\end{itemize}
+
+\subsection{Предаване на параметри}
+По официален конспект се разглеждат следните основни механизми за предаване:
+\begin{itemize}
+    \item \textbf{Предаване по стойност (Pass by Value):} Създава се локално копие на аргумента в стековата рамка на функцията. Промените вътре във функцията не влияят на оригиналната променлива.
+    \item \textbf{Предаване по име (Pass by Name):} Исторически модел (използван например в ALGOL 60), при който аргументът се подставя на местата на формалния параметър в тялото на функцията при извикване. Този механизъм не е част от стандартния C++, но се разглежда теоретично в конспекта.
+\end{itemize}
+\textit{Забележка:} За да се променят оригиналните стойности на променливите, в практиката на C++ се използва предаване чрез псевдоним (референция) или указател, но теоретичният акцент в академичния конспект пада върху горните два модела.
+\begin{lstlisting}
+// Demonstrating parameter passing models
+void modifyValue(int num) {
+    // Pass by value: changes only the local stack copy
+    num = 100; 
+}
+
+void modifyByReference(int& num) {
+    // Pass by reference: changes the original argument
+    num = 100;
+}
+
+int main() {
+    int x = 5;
+
+    modifyValue(x);       // x remains 5
+    modifyByReference(x); // x becomes 100
+
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Типове и проверка за съответствие на тип}
+C++ е статично типизиран език. Компилаторът извършва строга проверка за съответствие на типовете (\textbf{Type Checking}) по време на компилация. Когато подадем аргумент на функция, компилаторът проверява дали типът му съвпада с дефинирания формален параметър. При несъвпадение се прави опит за автоматично (неявно) преобразуване на типа, а ако такова е невъзможно, компилацията се прекъсва с грешка за несъвместимост.
+
+\end{FlushLeft}
+
+\end{document}

@@ -1,0 +1,293 @@
+\documentclass{scrartcl}
+\usepackage{graphicx}  % required for inserting images
+
+% for cyrillic and Bulgarian language
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[bulgarian]{babel}
+
+% math packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cancel}
+
+\usepackage{ragged2e}  % adds FlushLeft
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    %caption=Example C++,
+    label={lst:listing-cpp},
+    language=C++,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    keepspaces=true,                 
+    numbers=left,       
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+}
+\lstset{style=mystyle}
+
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+
+\newtheorem{theorem}{Теорема}
+\newtheorem{definition}{Дефиниция}
+
+\title{Увод в програмирането - Указатели, масиви, рекурсия}
+\author{Ивайло Андреев + gemeni 3 Flash, chat gpt 5.4}
+\date{16 май 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\begin{FlushLeft}
+
+\section{Указатели и указателна аритметика}
+Указателят е специален вид променлива, която съхранява като своя стойност \textbf{адрес на друга променлива} в паметта. Вместо да пази директни данни, той сочи към местоположението им. Размерът на указателя е фиксиран и зависи единствено от архитектурата на процесора (4 байта при 32-битови системи, 8 байта при 64-битови системи), независимо от типа данни, към който сочи.
+
+\subsection{Основни операции и аритметика}
+Две основни операции дефинират работата с указатели: вземане на адрес (\texttt{\&}) и дерефериране (\texttt{*}).
+\begin{lstlisting}
+int a = 5;
+int *p = &a; // '&' takes the address of variable 'a'
+int value = *p; // '*' dereferences the pointer to get the value (5)
+\end{lstlisting}
+
+\textbf{Указателна аритметика:} Към указател може да се добавя или изважда цяло число. При добавяне на 1, адресът не се увеличава с 1 байт, а се измества с размера на типа данни, към който сочи: $\text{нов\_адрес} = \text{текущ\_адрес} + i \times \text{sizeof}(T)$. Две указателя от един и същи тип могат да се изваждат, което връща броя елементи между тях.
+
+\section{Едномерни и многомерни масиви}
+Масивът е структура от данни, състояща се от фиксиран брой елементи от \textbf{един и същи тип}, които са разположени последователно в \textbf{непрекъснат блок от паметта}. Името на масива не е указател, но в много изрази се преобразува до адреса на неговия първи елемент (индекс 0).
+
+\subsection{Индексиране и предаване на масиви}
+Операцията индексиране осигурява директен достъп до елементите. Поради непрекъснатостта на паметта, изразът \texttt{arr[i]} е напълно еквивалентен на указателния запис \texttt{*(arr + i)}.
+
+Многомерните масиви (напр. двумерни) се разполагат в паметта линейно, ред по ред (\textit{Row-major order}). За да може компилаторът да пресметне точния адрес на даден елемент \texttt{matrix[i][j]}, той трябва да знае размера на редовете. Затова при предаване на многомерен масив като параметър във функция, \textbf{задължително трябва да се указват размерите на всички измерения без първото}.
+
+Понеже елементите на всеки ред лежат последователно в паметта, на практика е по-ефективно масивът да се обхожда \textbf{по редове, а не по колони}. Така достъпът е по-добър за кеша на процесора (\textit{cache locality}) и програмата обикновено работи по-бързо.
+
+Пример за функция, която приема двумерен масив с 3 колони:
+\begin{lstlisting}
+#include <iostream>
+
+void printMatrix(int matrix[][3], int rows) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < 3; j++) {
+            std::cout << matrix[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+int main() {
+    int data[2][3] = {
+        {1, 2, 3},
+        {4, 5, 6}
+    };
+
+    printMatrix(data, 2);
+    return 0;
+}
+\end{lstlisting}
+
+Тук \texttt{matrix[][3]} показва, че броят на редовете може да се подаде отделно, но броят на колоните трябва да е известен в сигнатурата на функцията.
+
+\subsection{Основни алгоритми за масиви (Текст и код)}
+В съответствие с изискването за смесване на обяснения и програмни блокове, тук са разписани четирите фундаментални алгоритъма:
+
+\textbf{1. Bubble Sort (Сортиране чрез мехурчето):} Алгоритъмът обхожда масива многократно, като сравнява всеки два съседни елемента и ги разменя, ако са в грешен ред. По този начин най-големият елемент постепенно "изплува" към края. Сложност: $O(n^2)$.
+\begin{lstlisting}
+void bubbleSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                // Swap adjacent elements if left is greater than right
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{2. Selection Sort (Сортиране чрез избор):} Алгоритъмът разделя масива на сортирана и несортирана част. При всяка стъпка намира най-малкия елемент от несортираната част и го разменя с първия елемент от нея. Сложност: $O(n^2)$.
+\begin{lstlisting}
+void selectionSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        int minIdx = i; // Track the minimum index in unsorted part
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[minIdx]) {
+                minIdx = j; // Found a smaller element, update index
+            }
+        }
+        // Swap the found minimum with the first unsorted position
+        int temp = arr[i];
+        arr[i] = arr[minIdx];
+        arr[minIdx] = temp;
+    }
+}
+\end{lstlisting}
+
+\textbf{3. Linear Search (Последователно търсене):} Обхожда елементите един по един от началото до края, докато намери търсената стойност. Работи на всякакви масиви (сортирани и несортирани). Сложност: $O(n)$.
+\begin{lstlisting}
+int linearSearch(int arr[], int n, int target) {
+    for (int i = 0; i < n; i++) {
+        if (arr[i] == target) {
+            return i; // Target found, return current index
+        }
+    }
+    return -1; // Target not found in the array
+}
+\end{lstlisting}
+
+\textbf{4. Binary Search (Двоично търсене):} Изключително ефективен алгоритъм, но работи \textbf{само върху предварително сортирани масиви}. Разделя интервала за търсене наполовина при всяка стъпка, сравнявайки средния елемент с търсената стойност. Сложност: $O(\log n)$.
+\begin{lstlisting}
+int binarySearch(int arr[], int n, int target) {
+    int left = 0, right = n - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2; // Avoid potential overflow
+        if (arr[mid] == target) {
+            return mid; // Target element located
+        }
+        if (arr[mid] < target) {
+            left = mid + 1; // Discard left half
+        } else {
+            right = mid - 1; // Discard right half
+        }
+    }
+    return -1; // Target not found
+}
+\end{lstlisting}
+
+\section{Символни низове}
+Традиционните C-style низове се представят в паметта като \textbf{едномерен масив от символи (\texttt{char})}, който завършва със специален терминиращ символ – \textbf{нулев байт \texttt{'\textbackslash0'}} (ASCII код 0). Този символ указва края на низа в непрекъснатата памет. Всеки символ заема точно 1 байт. Например, низът \texttt{"hello"} заема 6 байта в паметта заради знака \texttt{'\textbackslash0'} накрая.
+
+\subsection{Основни операции}
+Управлението на C-style низове става чрез стандартни функции от библиотеката \texttt{<cstring>}. Ето как се използват те в практически код:
+\begin{lstlisting}
+#include <cstring>
+
+void stringDemo() {
+    char h[] = "hello";  // same as char h[] = {'h', 'e', 'l', 'l', 'o', '\0'};
+    char buffer[20];
+
+    // 1. strlen: Returns the number of characters excluding '\0'
+    int len = strlen(h); 
+
+    // 2. strcpy: Copies the source string content into the destination buffer
+    strcpy(buffer, h);
+
+    // 3. strcat: Appends (concatenates) source text to the destination
+    strcat(buffer, " world");
+
+    // 4. strcmp: Lexicographically compares two strings (returns 0 if equal)
+    int cmp = strcmp(buffer, h);
+}
+\end{lstlisting}
+
+В съвременното C++ често се предпочита \texttt{std::string} от библиотеката \texttt{<string>}, защото е \textit{high-level} абстракция за работа с низове. Той управлява автоматично паметта, знае дължината си и намалява риска от често срещани грешки при C-style низовете, като излизане извън границите на масива или липсващ терминиращ символ \texttt{'\textbackslash 0'}. Затова на практика \texttt{std::string} е препоръчителният избор, а C-style низовете се използват главно при ниско ниво на работа, стари библиотеки или специфични задачи.
+
+\section{Рекурсия}
+Рекурсията е програмен подход, при който една функция се извиква самата себе си (директно или индиректно) за решаване на подпроблем. 
+
+\subsection{Етапи на изпълнение и механизъм}
+Изпълнението на рекурсията се поддържа от механизма на извикванията на функции и системния стек (\textbf{Call Stack}). При всяко извикване се заделя \textbf{стекова рамка (Stack Frame)}, съдържаща локалните променливи и адреса за връщане. Механизмът може да се разгледа в два основни етапа:
+\begin{itemize}
+    \item \textbf{Разгъване (Expansion):} Функцията се вика многократно, създавайки нови стекови рамки нагоре в паметта. Максималният брой вложени извиквания дефинира \textit{дълбочината на рекурсията}.
+    \item \textbf{Свиване (Collapse):} След достигане на \textbf{базовия случай (дъно)}, рекурсията спира да се разклонява и започва връщането на резултати обратно към предходните извиквания, като стековите рамки се разрушават една по една.
+\end{itemize}
+Липсата на базов случай води до безкрайна рекурсия и препълване на стека (\textit{stack overflow}). В много случаи рекурсивен алгоритъм може да бъде реализиран и итеративно, като извикванията се симулират чрез структурата от данни стек.
+
+\subsection{Класификация на видовете рекурсия (Текст и код)}
+
+\textbf{1. Пряка (Директна) рекурсия:} Функция директно извиква себе си в своето тяло.
+\begin{lstlisting}
+void directRec(int n) {
+    if (n <= 0) return; // Base case
+    directRec(n - 1); // Function calls itself directly
+}
+\end{lstlisting}
+
+\textbf{2. Косвена (Индиректна) рекурсия:} Функция \texttt{A} извиква функция \texttt{B}, а функция \texttt{B} от своя страна извиква функция \texttt{A}.
+\begin{lstlisting}
+void functionB(int n); // Forward declaration
+
+void functionA(int n) {
+    if (n <= 0) return; // Base case
+    functionB(n - 1); // Call function B
+}
+
+void functionB(int n) {
+    if (n <= 0) return; // Base case
+    functionA(n - 1); // Mutual call back to function A
+}
+\end{lstlisting}
+
+\textbf{3. Линейна рекурсия:} При всяко изпълнение функцията генерира най-много \textbf{едно} рекурсивно извикване (пример: пресмятане на Факториел $n!$).
+\begin{lstlisting}
+unsigned long long factorial(int n) {
+    if (n <= 1) return 1; // Base case
+    return n * factorial(n - 1); // Exactly one recursive call per step
+}
+\end{lstlisting}
+
+\textbf{4. Разклонена рекурсия:} Тялото на функцията съдържа \textbf{две или повече} рекурсивни извиквания, генерирайки дървовидна структура от извиквания (пример: Числа на Фибоначи).
+\begin{lstlisting}
+int fibonacci(int n) {
+    if (n <= 0) return 0; // Base case 1
+    if (n == 1) return 1; // Base case 2
+    // Multiple branching recursive calls
+    return fibonacci(n - 1) + fibonacci(n - 2); 
+}
+\end{lstlisting}
+
+\textbf{*бонус - Рекурсивно двоично търсене:} 
+Двоичното търсене може да бъде реализирано и рекурсивно. 
+При всяко извикване алгоритъмът сравнява средния елемент с търсената стойност и рекурсивно продължава само в едната половина на масива. 
+Алгоритъмът работи само върху сортирани масиви и има логаритмична сложност $O(\log n)$.
+
+\begin{lstlisting}
+int recursiveBinarySearch(int arr[], int left, int right, int target) {
+    if (left > right) {
+        return -1; // Target not found
+    }
+    
+    int mid = left + (right - left) / 2;
+    
+    if (arr[mid] == target) {
+        return mid; // Target found
+    }
+    
+    if (arr[mid] > target) {
+        return recursiveBinarySearch(arr, left, mid - 1, target);
+    }
+    
+    return recursiveBinarySearch(arr, mid + 1, right, target);
+}
+\end{lstlisting}
+
+\end{FlushLeft}
+
+\end{document}
