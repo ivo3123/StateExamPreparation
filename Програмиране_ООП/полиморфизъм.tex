@@ -1,0 +1,530 @@
+\documentclass{scrartcl}
+\usepackage{graphicx}  % required for inserting images
+
+% for cyrillic and Bulgarian language
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[bulgarian]{babel}
+
+% math packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cancel}
+
+\usepackage{ragged2e}  % adds FlushLeft
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    %caption=Example C++,
+    label={lst:listing-cpp},
+    language=C++,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    keepspaces=true,                 
+    numbers=left,       
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+}
+\lstset{style=mystyle}
+
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+
+\newtheorem{theorem}{Теорема}
+\newtheorem{definition}{Дефиниция}
+
+\title{Обектно ориентирано програмиране - Полиморфизъм. Множествено наследяване.}
+\author{Ивайло Андреев + Claude Sonnet 4.6}
+\date{17 май 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\begin{FlushLeft}
+
+% ============================================================
+\section{Полиморфизъм -- общ преглед}
+% ============================================================
+
+\textbf{Полиморфизмът} (от гр. „много форми") е принципът, при който един и същ интерфейс се реализира по различен начин в зависимост от типа на обекта. В C++ съществуват два вида:
+
+\begin{itemize}
+    \item \textbf{Статичен (compile-time) полиморфизъм:} изборът на функция се прави по време на компилация. Реализира се чрез претоварване на функции/оператори и \textbf{шаблони (templates)}.
+    \item \textbf{Динамичен (run-time) / Подтипов полиморфизъм:} изборът се прави по време на изпълнение. Реализира се чрез \textbf{наследяване и виртуални функции}.
+\end{itemize}
+
+% ============================================================
+\section{Виртуални функции и подтипов полиморфизъм. Динамично свързване.}
+% ============================================================
+
+\subsection{Статично срещу динамично свързване}
+
+Без ключовата дума \texttt{virtual} компилаторът определя коя функция да извика единствено на базата на \textbf{статичния тип} на указателя/референцията (ранно свързване). С \texttt{virtual} -- на базата на \textbf{реалния тип} на обекта по време на изпълнение (късно свързване).
+
+\begin{lstlisting}
+class Base {
+public:
+    void f() const { std::cout << "Base::f()\n"; }       // non-virtual
+    virtual void g() const { std::cout << "Base::g()\n"; } // virtual
+};
+
+class Derived : public Base {
+public:
+    void f() const { std::cout << "Derived::f()\n"; }          // hides Base::f
+    void g() const override { std::cout << "Derived::g()\n"; } // overrides Base::g
+};
+
+int main() {
+    Derived d;
+    Base* p = &d;
+
+    p->f(); // Base::f()    -- static binding (non-virtual)
+    p->g(); // Derived::g() -- dynamic binding (virtual)
+}
+\end{lstlisting}
+
+\subsection{Виртуални функции -- правила и спецификатори}
+
+\begin{itemize}
+    \item \textbf{\texttt{virtual}:} Декларира функцията за виртуална в базовия клас. Всички класове-наследници наследяват тази виртуалност автоматично.
+    \item \textbf{\texttt{override}:} Изрично указва, че функцията предефинира виртуална функция от базовия клас. Компилаторът проверява -- предпазва от typo-грешки в сигнатурата.
+    \item \textbf{\texttt{final}:} Забранява по-нататъшно предефиниране на функцията (или наследяване от класа).
+    \item \textbf{Виртуален деструктор:} Задължителен в базов клас, ако обектите ще се изтриват чрез указател към базовия клас. Без него \texttt{delete p} извиква само деструктора на базовия клас -- \textbf{изтичане на памет} или неопределено поведение.
+\end{itemize}
+
+\begin{lstlisting}
+class Shape {
+public:
+    virtual void draw() const = 0;    // pure virtual
+    virtual ~Shape() = default;       // virtual destructor -- mandatory!
+};
+
+class Circle : public Shape {
+public:
+    void draw() const override final { // override + forbid further overriding
+        std::cout << "Drawing circle\n";
+    }
+};
+\end{lstlisting}
+
+\textbf{Ограничения:} Виртуалните функции не могат да бъдат \texttt{static} (нямат \texttt{this} указател). Конструкторите не могат да бъдат виртуални.
+
+\subsection{Механизъм на динамичното свързване (vtable / vptr)}
+
+За всеки клас с поне една виртуална функция компилаторът генерира \textbf{виртуална таблица (vtable)} -- масив от указатели към конкретните виртуални функции. Всеки обект от такъв клас съдържа скрит \textbf{указател към vtable (vptr)}, инициализиран от конструктора.
+
+При извикване \texttt{p->f()} (където \texttt{f} е виртуална) компилаторът генерира код:
+\begin{enumerate}
+    \item Прочети \texttt{vptr} от обекта.
+    \item Намери слота на \texttt{f} във \texttt{vtable}.
+    \item Извикай функцията на намерения адрес.
+\end{enumerate}
+
+\begin{lstlisting}
+// Conceptual memory layout of an object with virtual functions:
+//
+//  [ vptr ] --> vtable of actual class:
+//  [ data ]       [0] -> &ActualClass::f
+//                 [1] -> &ActualClass::g
+//                 ...
+\end{lstlisting}
+
+\textbf{Цена:} Всяко извикване на виртуална функция добавя едно индиректно разкостване (разглеждане на vptr и vtable). Всеки обект с виртуални функции носи допълнителните \texttt{sizeof(void*)} байта за vptr.
+
+\subsection{Пример: динамично свързване при дълбока йерархия}
+
+Следният пример илюстрира точно коя функция се извиква при различни комбинации от йерархия и override-ване:
+
+\begin{lstlisting}
+class Base {
+public:
+    virtual void f() const { std::cout << "Base::f()\n"; }
+    virtual void g() const { std::cout << "Base::g()\n"; }
+    void nonVirtual() const { std::cout << "Base::nonVirtual()\n"; }
+};
+
+class FirstDerived : public Base {
+public:
+    void f() const override { std::cout << "FirstDerived::f()\n"; }
+    void g() const override { std::cout << "FirstDerived::g()\n"; }
+    virtual void h() const  { std::cout << "FirstDerived::h()\n"; } // new virtual
+};
+
+class SecondDerived : public FirstDerived {
+public:
+    void f() const override { std::cout << "SecondDerived::f()\n"; }
+    // g() NOT overridden -- inherited from FirstDerived
+};
+
+class ThirdDerived : public SecondDerived {
+public:
+    void h() const override { std::cout << "ThirdDerived::h()\n"; }
+    // f() NOT overridden -- inherited from SecondDerived
+};
+\end{lstlisting}
+
+\begin{lstlisting}
+int main() {
+    Base          baseObj;
+    FirstDerived  firstObj;
+    SecondDerived secondObj;
+    ThirdDerived  thirdObj;
+
+    Base* p = nullptr;
+
+    p = &baseObj;
+    p->f();          // Base::f()
+    p->g();          // Base::g()
+    p->nonVirtual(); // Base::nonVirtual()  (static -- always Base)
+
+    p = &firstObj;
+    p->f();          // FirstDerived::f()
+    p->g();          // FirstDerived::g()
+
+    p = &secondObj;
+    p->f();          // SecondDerived::f()
+    p->g();          // FirstDerived::g()  -- not overridden in SecondDerived!
+
+    p = &thirdObj;
+    p->f();          // SecondDerived::f() -- not overridden in ThirdDerived
+    p->g();          // FirstDerived::g()  -- not overridden anywhere below First
+
+    // h() is NOT in Base's interface -- cannot call through Base*
+    // Need FirstDerived* to access h():
+    FirstDerived* fp = &thirdObj;
+    fp->h();         // ThirdDerived::h() -- dynamic dispatch
+}
+\end{lstlisting}
+
+Ключовото наблюдение: виртуалната функция \textbf{продължава да се търси нагоре по йерархията} до намерения override. Ако \texttt{SecondDerived} не предефинира \texttt{g()}, но \texttt{FirstDerived} го е направил -- \texttt{FirstDerived::g()} се извиква. Невиртуалните методи (\texttt{nonVirtual()}) винаги се свързват статично с типа на указателя.
+
+\subsection{Абстрактни класове и чисто виртуални функции}
+
+\textbf{Чисто виртуална функция} се декларира с \texttt{= 0} и задължава всеки конкретен наследник да я предефинира. Клас с поне една чисто виртуална функция е \textbf{абстрактен} -- от него не могат да се създават обекти директно. Служи като интерфейс.
+
+\begin{lstlisting}
+class Animal {
+public:
+    virtual void speak() const = 0;  // pure virtual -- no body here
+    virtual ~Animal() = default;
+};
+
+class Dog : public Animal {
+public:
+    void speak() const override { std::cout << "Woof!\n"; }
+};
+
+class Cat : public Animal {
+public:
+    void speak() const override { std::cout << "Meow!\n"; }
+};
+
+// Animal a;  // ERROR: cannot instantiate abstract class
+Animal* a = new Dog();
+a->speak();   // Woof! -- dynamic dispatch
+delete a;
+\end{lstlisting}
+
+Чисто виртуална функция \textbf{може да има тяло}, дефинирано извън класа. Наследниците могат да го извикват явно чрез \texttt{Base::f()}. Класът остава абстрактен -- наследниците пак трябва да я предефинират.
+
+\begin{lstlisting}
+void Animal::speak() const {         // body of pure virtual
+    std::cout << "...(silence)...\n";
+}
+
+class Parrot : public Animal {
+public:
+    void speak() const override {
+        Animal::speak();             // call base body explicitly
+        std::cout << "Polly wants a cracker!\n";
+    }
+};
+\end{lstlisting}
+
+% ============================================================
+\section{Масиви от обекти и от указатели към обекти}
+% ============================================================
+
+\subsection{Масив от обекти (на стека)}
+
+\begin{lstlisting}
+class Widget { /* ... */ };
+
+Widget arr[5];   // calls default constructor 5 times
+                 // destructors called automatically when arr goes out of scope
+\end{lstlisting}
+
+\textbf{Характеристики:} Обектите са плътно в паметта. Всички елементи се конструират с един и същ конструктор (по подразбиране). Размерът е фиксиран при компилация.
+
+\subsection{Динамичен масив от обекти (на heap-а)}
+
+\begin{lstlisting}
+Widget* arr = new Widget[5];  // calls default constructor 5 times
+delete[] arr;                 // calls destructor 5 times, then frees memory
+                              // delete[] -- NOT delete!
+\end{lstlisting}
+
+Размерът може да се определи по време на изпълнение. Изисква \texttt{delete[]} -- \texttt{delete} (без \texttt{[]}) е \textbf{неопределено поведение}.
+
+\subsection{Масив от указатели към обекти}
+
+\begin{lstlisting}
+Widget* arr[5];               // array of 5 pointers (uninitialized)
+arr[0] = new Widget(42);      // each element independently constructed
+arr[1] = new Widget(7);
+// ...
+for (int i = 0; i < 5; i++) delete arr[i]; // each element independently destroyed
+\end{lstlisting}
+
+\textbf{Предимства:} всеки елемент може да е конструиран с различни аргументи; позиция може да бъде \texttt{nullptr}; позволява \textbf{полиморфизъм}.
+
+\subsection{Проблемът с нарязването (Object Slicing) и полиморфните контейнери}
+
+При съхранение на производен обект \textbf{по стойност} в базов тип се губят допълнителните полета и виртуалното поведение -- това се нарича \textbf{object slicing}:
+
+\begin{lstlisting}
+class Base {
+public:
+    virtual std::string name() const { return "Base"; }
+    virtual ~Base() = default;
+};
+
+class Derived : public Base {
+public:
+    std::string name() const override { return "Derived"; }
+    int extra = 42;  // extra data, lost on slicing
+};
+
+// Problem: storing by value causes slicing
+Derived d;
+Base b = d;      // SLICING: only the Base part is copied
+b.name();        // "Base" -- NOT "Derived"!
+\end{lstlisting}
+
+Решението е \textbf{масив от указатели към базовия клас} -- полиморфен контейнер:
+
+\begin{lstlisting}
+Base* arr[2];
+arr[0] = new Base();
+arr[1] = new Derived();
+
+for (int i = 0; i < 2; i++) {
+    std::cout << arr[i]->name() << "\n"; // "Base", then "Derived" -- correct!
+    delete arr[i];                        // correct because ~Base() is virtual
+}
+\end{lstlisting}
+
+\textbf{Задължително:} Деструкторът на базовия клас трябва да е \texttt{virtual}, за да се извикат правилните деструктори на наследниците при \texttt{delete zoo[i]}.
+
+% ============================================================
+\section{Параметричен полиморфизъм. Шаблони на функция и на клас.}
+% ============================================================
+
+Параметричният полиморфизъм се реализира чрез \textbf{шаблони (templates)} -- механизъм за писане на обобщен код, работещ с произволен тип. Типът е параметър, подаден при компилация. Компилаторът \textbf{инстанцира} (генерира конкретен код) за всеки използван тип.
+
+\subsection{Шаблони на функция}
+
+\begin{lstlisting}
+template <typename T>
+T maxOf(const T& a, const T& b) {
+    return (a > b) ? a : b;
+}
+
+int main() {
+    std::cout << maxOf<int>(3, 7);      // explicit: T = int
+    std::cout << maxOf(3.14, 2.71);     // deduced: T = double (type deduction)
+    std::cout << maxOf(std::string("a"), std::string("b")); // T = string
+}
+\end{lstlisting}
+
+Компилаторът генерира отделна функция за всеки тип \texttt{T} -- \texttt{maxOf<int>}, \texttt{maxOf<double>} и т.н. Ако типът не поддържа \texttt{>}, се получава грешка при компилация.
+
+Може да се използва \texttt{class} вместо \texttt{typename} -- двете са еквивалентни в този контекст.
+
+\subsection{Шаблони на клас}
+
+\begin{lstlisting}
+template <typename T>
+class Stack {
+public:
+    void push(const T& val) { data[top++] = val; }
+    T pop()                 { return data[--top]; }
+    bool empty() const      { return top == 0; }
+private:
+    T data[100];
+    int top = 0;
+};
+
+int main() {
+    Stack<int> intStack;
+    intStack.push(1);
+    intStack.push(2);
+    std::cout << intStack.pop(); // 2
+
+    Stack<std::string> strStack;
+    strStack.push("hello");
+}
+\end{lstlisting}
+
+\subsection{Нетипови параметри на шаблон}
+
+Параметрите на шаблон могат да бъдат и конкретни стойности (не само типове):
+
+\begin{lstlisting}
+template <typename T, int N>
+class Array {
+    T data[N];   // fixed-size array, size known at compile time
+public:
+    int size() const { return N; }
+    T& operator[](int i) { return data[i]; }
+};
+
+Array<double, 10> v;  // array of 10 doubles, no heap allocation
+\end{lstlisting}
+
+\subsection{Специализация на шаблон}
+
+Можем да дефинираме специално поведение за конкретен тип:
+
+\begin{lstlisting}
+template <typename T>
+T sum(T a, T b) { return a + b; }   // general
+
+template <>
+const char* sum(const char* a, const char* b) {  // specialization for char*
+    // custom string concatenation logic
+}
+\end{lstlisting}
+
+\subsection{Ограничение: дефиниции в хедър файл}
+
+Шаблоните не могат да се разделят на \texttt{.h} (декларация) и \texttt{.cpp} (дефиниция) по традиционния начин. При инстанциране компилаторът трябва да вижда цялото тяло на шаблона. Ако дефиницията е в отделен \texttt{.cpp}, linker-ът ще съобщи за липсващ символ. \textbf{Стандартна практика:} цялата имплементация в хедър файла (\texttt{.h}).
+
+% ============================================================
+\section{Множествено наследяване}
+% ============================================================
+
+C++ позволява производен клас да има \textbf{повече от един директен базов клас}:
+
+\begin{lstlisting}
+class Flyable {
+public:
+    virtual void fly() const { std::cout << "Flying\n"; }
+};
+
+class Swimmable {
+public:
+    virtual void swim() const { std::cout << "Swimming\n"; }
+};
+
+class Duck : public Flyable, public Swimmable {
+public:
+    void quack() const { std::cout << "Quack!\n"; }
+};
+
+int main() {
+    Duck d;
+    d.fly();   // OK
+    d.swim();  // OK
+    d.quack(); // OK
+}
+\end{lstlisting}
+
+\textbf{Предимства:} комбиниране на независими интерфейси/функционалности; повторна употреба на код.
+
+\subsection{Диамантен проблем (Diamond Problem)}
+
+Проблемът възниква, когато един базов клас се наследява по \textbf{два независими пътя}, което води до \textbf{две отделни копия} на базовия клас в производния.
+
+\begin{lstlisting}
+class Base { public: int x; };
+class A : public Base { };    // A::Base::x
+class B : public Base { };    // B::Base::x -- separate copy!
+class C : public A, public B { };
+
+int main() {
+    C obj;
+    // obj.x = 5;       // ERROR: ambiguous -- A::x or B::x ?
+    obj.A::x = 5;       // OK: explicit disambiguation
+    obj.B::x = 10;      // OK
+}
+\end{lstlisting}
+
+Конструкторът на \texttt{Base} се извиква \textbf{два пъти} -- веднъж чрез \texttt{A} и веднъж чрез \texttt{B}.
+
+\subsection{Виртуално наследяване -- решение на диамантения проблем}
+
+Ключовата дума \texttt{virtual} пред базовия клас гарантира, че в крайния наследник ще съществува \textbf{само едно споделено копие} на общия базов клас.
+
+\begin{lstlisting}
+class Base { public: int x; };
+class A : virtual public Base { };   // virtual inheritance
+class B : virtual public Base { };   // virtual inheritance
+class C : public A, public B { };    // one shared Base::x
+
+int main() {
+    C obj;
+    obj.x = 42;  // OK: no ambiguity, only one Base
+}
+\end{lstlisting}
+
+\subsection{Конструктори при виртуално наследяване}
+
+При виртуално наследяване \textbf{само най-производният клас} (в случая \texttt{C}) инициализира виртуалния базов клас. Инициализациите на \texttt{Base} в \texttt{A} и \texttt{B} се \textbf{игнорират}:
+
+\begin{lstlisting}
+class Base {
+public:
+    Base(int v) { std::cout << "Base(" << v << ")\n"; }
+};
+
+class A : virtual public Base {
+public:
+    A() : Base(0) { } // Base(0) is IGNORED when constructing through C
+};
+
+class B : virtual public Base {
+public:
+    B() : Base(1) { } // Base(1) is IGNORED when constructing through C
+};
+
+class C : public A, public B {
+public:
+    C() : Base(42), A(), B() { } // Base(42) is the one that runs
+};
+// Output: Base(42)  A()  B()  C()
+\end{lstlisting}
+
+\textbf{Ред на конструиране при виртуално наследяване:}
+\begin{enumerate}
+    \item Конструктори на виртуалните базови класове (извикани от най-производния клас).
+    \item Конструктори на невиртуалните базови класове (в реда на декларирането им).
+    \item Конструктори на член-данните (в реда на декларирането им).
+    \item Тялото на конструктора на самия клас.
+\end{enumerate}
+
+\end{FlushLeft}
+
+\end{document}
