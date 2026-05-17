@@ -1,0 +1,531 @@
+\documentclass{scrartcl}
+\usepackage{graphicx}  % required for inserting images
+
+% for cyrillic and Bulgarian language
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[bulgarian]{babel}
+
+% math packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cancel}
+
+\usepackage{ragged2e}  % adds FlushLeft
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    %caption=Example C++,
+    label={lst:listing-cpp},
+    language=C++,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    keepspaces=true,                 
+    numbers=left,       
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+}
+\lstset{style=mystyle}
+
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+
+\newtheorem{theorem}{Теорема}
+\newtheorem{definition}{Дефиниция}
+
+\title{Обектно ориентирано програмиране - Основни принципи}
+\author{Ивайло Андреев + Claude Sonnet 4.6}
+\date{16 май 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\begin{FlushLeft}
+
+% ============================================================
+\section{Основни принципи на ООП}
+% ============================================================
+
+Обектно-ориентираното програмиране (ООП) е програмна парадигма, при която системата се моделира като набор от взаимодействащи си обекти. За разлика от процедурния подход, тук обектите са основните носители на логика и данни.
+
+Четирите основни принципа на ООП са:
+\begin{itemize}
+    \item \textbf{Абстракция} -- моделиране на реални обекти чрез представяне само на съществените им характеристики.
+    \item \textbf{Капсулация} -- скриване на вътрешното състояние; достъпът се осъществява само чрез публичен интерфейс.
+    \item \textbf{Наследяване} -- нови класове се изграждат върху съществуващи, наследявайки техните характеристики.
+    \item \textbf{Полиморфизъм} -- унифициран интерфейс за обекти от различни типове; едно действие се реализира различно в зависимост от обекта.
+\end{itemize}
+
+% ============================================================
+\section{Абстракция със структури от данни. Класове и обекти.
+Декларация на клас и декларация на обект. Основни видове конструктори.
+Управление на динамичната памет и ресурсите (RAII). Методи}
+% ============================================================
+
+\subsection{Абстракция със структури от данни}
+
+Абстракцията в ООП е процес на \textbf{моделиране на реални обекти} (или концепции) чрез класове. При моделирането ние избираме само съществените за задачата характеристики и игнорираме останалите. Всеки обект се характеризира с три аспекта:
+
+\begin{itemize}
+    \item \textbf{Структура / Състояние (член-данни):} Какво \textit{знае} обектът -- атрибутите, чрез които се описва. Например за клиент на банка: \texttt{name}, \texttt{balance}, \texttt{accountId}.
+    \item \textbf{Поведение (методи):} Какво \textit{прави} обектът -- операциите, с които взаимодейства с околния свят. Например: \texttt{deposit()}, \texttt{withdraw()}, \texttt{getBalance()}.
+    \item \textbf{Идентичност:} Какво го \textit{отличава} от другите обекти от същия клас. Всяка инстанция е уникална (с различен адрес в паметта), дори ако има еднакви стойности на полетата.
+\end{itemize}
+
+Класът е шаблонът (типът), а обектът е конкретна инстанция. Например класът \texttt{BankAccount} моделира банкова сметка, а \texttt{aliceAccount} е конкретна сметка на Алис:
+
+\begin{lstlisting}
+class BankAccount {
+public:
+    BankAccount(double initial_balance) {
+        balance = (initial_balance >= 0) ? initial_balance : 0;
+    }
+
+    void deposit(double amount) {           // behavior
+        if (amount > 0) balance += amount;
+    }
+
+    bool withdraw(double amount) {          // behavior
+        if (amount > 0 && balance >= amount) {
+            balance -= amount;
+            return true;
+        }
+        return false;
+    }
+
+    double getBalance() const { return balance; } // behavior
+
+private:
+    double balance; // state
+};
+
+BankAccount aliceAccount(500.0); // object (instance)
+BankAccount bobAccount(200.0);   // different identity, same class
+\end{lstlisting}
+
+Потребителят на класа работи само с публичния интерфейс -- той не знае (и не трябва да знае) как точно се съхранява балансът.
+
+\subsection{Класове и обекти. Декларация на клас и декларация на обект}
+
+\textbf{Декларацията на клас} дефинира нов тип -- структурата и поведението му. Сама по себе си \textbf{не заделя памет}.
+
+\begin{lstlisting}
+// Class declaration
+class Person {
+private:
+    std::string name;
+    int age;
+
+public:
+    // ... methods
+};
+\end{lstlisting}
+
+\textbf{Декларацията на обект} създава конкретна инстанция от класа и заделя памет за нейните член-данни. Всеки обект има собствено състояние, но споделя дефиницията на методите с останалите.
+
+\begin{lstlisting}
+// Declaration (and definition) of objects
+Person p1;
+Person p2;
+\end{lstlisting}
+
+\textbf{Обхват на видимост (Scope):} Класовете могат да бъдат дефинирани в:
+\begin{itemize}
+    \item \textbf{Глобален обхват} (на ниво namespace): достъпни в цялата програма след декларацията им.
+    \item \textbf{Локален обхват}: клас, дефиниран в тялото на функция, е достъпен само в нея (методите му трябва да бъдат дефинирани inline).
+\end{itemize}
+
+\subsection{Основни видове конструктори}
+
+Конструкторът е специална член-функция, извиквана автоматично при създаване на обект. Инициализира член-данните и установява валидно начално състояние (класов инвариант). Носи същото име като класа и \textbf{няма тип на връщана стойност}.
+
+\subsubsection{Конструктор по подразбиране (Default Constructor)}
+Извиква се без аргументи. Компилаторът го генерира автоматично с празно тяло, \textbf{но само ако не сме дефинирали нито един друг конструктор}. Задължителен за създаване на масиви от обекти.
+\begin{itemize}
+    \item Сигнатура: \texttt{Widget();}
+\end{itemize}
+
+\subsubsection{Параметризиран конструктор (Parameterized Constructor)}
+Приема аргументи за инициализация на член-данните с конкретни стойности.
+\begin{itemize}
+    \item Сигнатура: \texttt{Widget(int size, const std::string\& name);}
+\end{itemize}
+
+\textbf{Засенчване на имена (Shadowing):} Когато параметър съвпада по име с член-данна, предпочитаният подход е инициализиращият списък.
+
+\begin{lstlisting}
+class A {
+private:
+    int size;
+public:
+    // Preferred: member initializer list
+    A(int size) : size(size) {}
+};
+
+class B {
+private:
+    int size;
+public:
+    // Alternative: this pointer (less efficient)
+    B(int size) {
+        this->size = size;
+    }
+};
+\end{lstlisting}
+
+Класът може да има \textbf{множество конструктори} с различен брой или типове аргументи (претоварване на конструктори):
+
+\begin{lstlisting}
+class Point {
+public:
+    Point() : x(0), y(0) {}                     // default
+    Point(double x, double y) : x(x), y(y) {}   // parameterized
+    Point(double val) : x(val), y(val) {}        // from single value
+private:
+    double x, y;
+};
+\end{lstlisting}
+
+\subsubsection{Инициализиращ списък (Member Initializer List)}
+Синтактична конструкция, изпълняваща се \textbf{преди} тялото на конструктора. Извършва директна инициализация -- за разлика от присвояването в тялото. Може да се ползва за всички член-данни, а не само когато е задължителен.
+
+\begin{lstlisting}
+class MyClass {
+    int x;
+    const int y;
+public:
+    // Using member initializer list (preferred):
+    MyClass(int val_x, int val_y)
+        : x(val_x),   // initializes x directly
+          y(val_y)    // the only way for const members
+    {
+        // body can be empty or do additional work
+    }
+
+    // Without initializer list (body assignment):
+    MyClass(int val_x_only) {
+        x = val_x_only;   // assignment after default-construction of x
+        // y = 0;         // ERROR: cannot assign to const after construction
+    }
+};
+\end{lstlisting}
+
+\textbf{Задължителен е в следните случаи:}
+\begin{itemize}
+    \item Извикване на конструктор на базов клас -- единственият начин да се подадат аргументи към родителски конструктор.
+    \item За \texttt{const} член-данни -- трябва да се инициализират при създаване.
+    \item За членове референции (\texttt{\&}).
+    \item За член-данни от класове без конструктор по подразбиране.
+\end{itemize}
+
+\subsubsection{Копиращ конструктор (Copy Constructor)}
+Създава нов обект като копие на съществуващ. Ключов при управление на ресурси (дълбоко копиране). Извиква се при инициализация от друг обект и при подаване/връщане по стойност.
+\begin{itemize}
+    \item Сигнатура: \texttt{Widget(const Widget\& other);}
+\end{itemize}
+
+\textbf{Разлика между копиращия конструктор и \texttt{operator=}:} И двата извършват копиране, но се извикват в различен контекст -- разграничителят е дали обектът \textit{вече съществува}:
+
+\begin{lstlisting}
+Widget a;
+Widget b(a);   // copy constructor: b is a NEW object, initialized from a
+Widget c = a;  // copy constructor: despite '=', c is NEW (copy-initialization)
+
+Widget d;
+d = a;         // operator=: d ALREADY EXISTS; a's state is assigned into d
+\end{lstlisting}
+
+Символът \texttt{=} \textbf{не означава винаги присвояване} -- при деклариране на нов обект той извиква копиращия конструктор.
+
+\subsubsection{Преместващ конструктор (Move Constructor)}
+``Открадва'' ресурсите от временен изтичащ обект (rvalue), вместо да ги копира скъпо. След преместването оригиналът остава в ``празно'', но валидно състояние.
+\begin{itemize}
+    \item Сигнатура: \texttt{Widget(Widget\&\& other) noexcept;}
+    \item \texttt{noexcept} е критично важен -- уверява стандартната библиотека, че операцията е безопасна.
+\end{itemize}
+
+\subsubsection{Конвертиращ конструктор (Converting Constructor)}
+Конструктор с един аргумент, дефиниращ правило за имплицитно преобразуване от друг тип. Маркира се с \texttt{explicit}, за да се забрани автоматичното преобразуване.
+
+\begin{lstlisting}
+class foo {
+public:
+    foo(int) {} // converting constructor from int to foo
+};
+
+void g(foo obj) { }
+
+// g(5);      // OK: compiler implicitly creates foo(5)
+// g(foo(5)); // OK: explicit call (required with explicit keyword)
+\end{lstlisting}
+
+\subsubsection{Деструктор}
+Извиква се автоматично при унищожаване на обект. Предназначен да освободи всички ресурси (динамична памет, файлове, мрежови връзки).
+\begin{itemize}
+    \item Сигнатура: \texttt{\textasciitilde Widget();}
+\end{itemize}
+
+\subsection{Управление на динамичната памет и ресурсите (RAII)}
+
+\textbf{RAII} (Resource Acquisition Is Initialization) е централен идиом в C++: придобиването на ресурс се обвързва с инициализацията на обект, а освобождаването -- с деструктора му. Гарантира автоматично и надеждно управление.
+
+Разширените механизми са:
+\begin{itemize}
+    \item \textbf{Оператор за присвояване чрез копиране:} \texttt{Widget\& operator=(const Widget\& other);}
+    \item \textbf{Оператор за присвояване чрез преместване:} \texttt{Widget\& operator=(Widget\&\& other) noexcept;}
+\end{itemize}
+
+\subsubsection{Дълбоко копиране срещу плитко копиране}
+
+По подразбиране копиращите операции извършват \textbf{плитко копиране} (shallow copy) -- копират само стойностите бит по бит. При указател се копира адресът, не данните. Това води до:
+\begin{itemize}
+    \item Два обекта сочат към един и същ ресурс -- неочаквани странични ефекти.
+    \item \textit{Double-free error} -- деструкторът освобождава ресурса два пъти.
+\end{itemize}
+
+Решението е ръчно дефинирано \textbf{дълбоко копиране} (deep copy). Важно е да се познава разликата между инициализация и присвояване:
+
+\begin{lstlisting}
+Test t1; // default constructor
+
+// Forms that invoke the COPY CONSTRUCTOR:
+Test t2(t1);  // direct initialization -- most explicit form
+Test t3 = t1; // copy-initialization -- despite '=', creates a new object
+
+// Form that invokes the ASSIGNMENT OPERATOR:
+t2 = t1;      // t2 already exists; t1's state is assigned to t2
+\end{lstlisting}
+
+\subsubsection{Правила за управление на специалните методи}
+
+На практика класовете следват едно от следните правила:
+\begin{itemize}
+    \item \textbf{Нищо не дефинираме:} Ако класът не управлява ресурси директно -- разчитаме изцяло на компилатора.
+    \item \textbf{Голяма четворка:} Ако имаме ръчно управление на ресурси (напр. динамична памет), дефинираме всичките четири: \{конструктор по подразбиране, копиращ конструктор, копиращ \texttt{operator=}, деструктор\}. Дефиниран деструктор \textbf{спира} автоматичното генериране на преместващите операции от компилатора.
+    \item \textbf{Голяма шестица (C++11+):} Ако добавяме и поддръжка за преместване -- дефинираме всичките шест: \{конструктор по подразбиране, копиращ конструктор, копиращ \texttt{op=}, преместващ конструктор, преместващ \texttt{op=}, деструктор\}.
+\end{itemize}
+
+\subsection{Методи -- декларация, предаване на параметри, връщане на резултат}
+
+Методите (член-функциите) дефинират поведението на обекта. Декларират се в тялото на класа.
+
+\textbf{Указателят \texttt{this}:} Всеки нестатичен метод получава скрит параметър \texttt{this} -- указател към обекта, за който е извикан. Чрез него методът достъпва член-данните на конкретната инстанция. Компилаторът трансформира член-функциите до обикновени функции с допълнителен първи параметър \texttt{this}:
+
+\begin{lstlisting}
+struct Point {
+    bool isInFirstQuadrant();   // non-const method
+    bool isOrigin() const;      // const method
+};
+
+// Compiler transforms them roughly to:
+//   bool isInFirstQuadrant(Point* const this)       // non-const
+//   bool isOrigin(const Point* const this)          // const: cannot modify *this
+//                ^^^^^
+// pt.isInFirstQuadrant()  -->  isInFirstQuadrant(&pt)
+// pt.isOrigin()           -->  isOrigin(&pt)
+\end{lstlisting}
+
+\textbf{Константни методи:} Деклариран с \texttt{const} накрая, методът обещава да не променя състоянието на обекта. В него \texttt{this} е указател към \texttt{const} обект. Могат да се извикват върху \texttt{const} обекти.
+
+\begin{lstlisting}
+struct obj {
+    void inspect() const; // Promises not to modify *this
+    void mutate();        // May modify *this
+};
+
+void Test(obj& changeable, const obj& unchangeable) {
+    changeable.inspect();    // OK: does not modify a mutable object
+    changeable.mutate();     // OK: modifies a mutable object
+    unchangeable.inspect();  // OK: does not modify an immutable object
+    unchangeable.mutate();   // ERROR: attempt to modify a const object
+}
+\end{lstlisting}
+
+Изключение: член-данни декларирани с \texttt{mutable} могат да бъдат модифицирани дори от \texttt{const} методи (например за кеш или брояч на извиквания).
+
+% ============================================================
+\section{Наследяване. Производни и вложени класове. Достъп до наследените
+компоненти. Капсулация и скриване на информацията. Статични полета и методи.}
+% ============================================================
+
+\subsection{Наследяване}
+
+Наследяването е механизъм, чрез който нов клас (наследник/производен) се изгражда върху вече съществуващ (базов/родителски). Производният клас автоматично получава всички публични и защитени членове на базовия, може да добавя нови и да презаписва (override) виртуални методи. Постига се \textbf{повторна употреба на код} и организация в йерархия.
+
+\subsection{Производни класове}
+
+\begin{lstlisting}
+class Animal {
+public:
+    void eat() { std::cout << "Eating...\n"; }
+};
+
+class Dog : public Animal {   // Dog is a derived class of Animal
+public:
+    void bark() { std::cout << "Barking...\n"; }
+};
+// Dog inherits eat() from Animal and adds its own method bark()
+\end{lstlisting}
+
+\subsection{Вложени класове}
+
+Вложен клас е клас, дефиниран вътре в друг (външен) клас. Служи за логическа групировка и капсулиране. Вложеният клас има достъп до публичните и защитените \textbf{статични} членове на външния; за нестатичните се нуждае от обект на външния клас.
+
+\begin{lstlisting}
+class Outer {
+public:
+    class Inner {
+    public:
+        void display() { std::cout << "Inner class\n"; }
+    };
+};
+
+Outer::Inner obj;
+obj.display();
+\end{lstlisting}
+
+\subsection{Достъп до наследените компоненти}
+
+Достъпът до наследените членове зависи от \textbf{вида на наследяването}:
+
+\begin{lstlisting}
+class Derived : public    Base { ... }; // public inheritance
+class Derived : protected Base { ... }; // protected inheritance
+class Derived : private   Base { ... }; // private inheritance
+\end{lstlisting}
+
+\begin{itemize}
+    \item При \texttt{public}: \texttt{public} и \texttt{protected} членове запазват достъпността си.
+    \item При \texttt{protected}: \texttt{public} и \texttt{protected} членове стават \texttt{protected}.
+    \item При \texttt{private}: всичко става \texttt{private}.
+\end{itemize}
+
+\textbf{По подразбиране:} При \texttt{class Derived : Base} е \texttt{private}; при \texttt{struct Derived : Base} е \texttt{public}.
+
+\textbf{Важно:} Производният клас \textbf{не може} директно да достъпва \texttt{private} членове на базовия -- само чрез публични/защитени методи. Наследените методи могат да бъдат презаписвани (override), ако са виртуални.
+
+\subsubsection{Наследяване (``is-a'') срещу композиция и агрегация (``has-a'')}
+
+\begin{itemize}
+    \item \textbf{Композиция:} ``Силна'' зависимост -- обект B не може да съществува без A. Реализира се чрез вграден член (B се създава и унищожава заедно с A).
+    \item \textbf{Агрегация:} ``По-слаба'' зависимост -- B може да съществува независимо. Реализира се чрез указатели или референции.
+\end{itemize}
+
+\begin{lstlisting}
+class Car {
+    Engine engine; // composition: Engine is created and destroyed with Car
+};
+
+class Car2 {
+    Engine* engine; // aggregation: Car2 only uses Engine, does not own it
+public:
+    Car2(Engine* e) : engine(e) {}
+};
+\end{lstlisting}
+
+Наследяването (``is-a'') е подходящо за специализации при полиморфизъм. Композицията/агрегацията (``has-a'') водят до по-гъвкав дизайн.
+
+\subsection{Капсулация и скриване на информацията}
+
+Капсулацията е механизмът за обединяване на данни и методи в единна структура (клас), като вътрешното състояние се скрива от външния свят. Достъпът се контролира чрез \textbf{модификатори на достъп}:
+
+\begin{itemize}
+    \item \texttt{private}: Само от методите на същия клас. По подразбиране в \texttt{class}.
+    \item \texttt{protected}: От класа и неговите наследници.
+    \item \texttt{public}: От всяка точка на програмата. По подразбиране в \texttt{struct}.
+\end{itemize}
+
+Практическо приложение са \textbf{аксесори} (getters) и \textbf{мутатори} (setters):
+
+\begin{lstlisting}
+class Person {
+private:
+    int age;
+public:
+    int getAge() const { return age; }         // Accessor (Getter)
+    void setAge(int a) { if (a > 0) age = a; } // Mutator (Setter) with validation
+};
+\end{lstlisting}
+
+\subsection{Статични полета и методи}
+
+Статичните членове са асоциирани със самия \textbf{клас}, а не с конкретен обект -- съществува само едно копие, споделено между всички инстанции.
+
+\begin{itemize}
+    \item \textbf{Статични данни:} Декларират се с \texttt{static} в класа, но задължително се \textbf{дефинират и инициализират извън него}. Съществуват през цялото изпълнение на програмата.
+    \item \textbf{Статични методи:} Нямат скрит \texttt{this}. Достъпват директно само статични членове. Извикват се чрез \texttt{ClassName::method()}.
+\end{itemize}
+
+\begin{lstlisting}
+class Widget {
+public:
+    Widget()  { count++; }
+    ~Widget() { count--; }
+
+    static int getCount() { return count; }
+
+private:
+    static int count; // declaration
+};
+
+int Widget::count = 0; // definition and initialization
+
+int main() {
+    std::cout << Widget::getCount() << std::endl; // 0
+
+    Widget w1, w2;
+    std::cout << Widget::getCount() << std::endl; // 2
+
+    {
+        Widget w3;
+        std::cout << w1.getCount() << std::endl;  // 3 (also accessible through an object)
+    } // w3 is destroyed here
+
+    std::cout << Widget::getCount() << std::endl; // 2
+}
+\end{lstlisting}
+
+\textbf{Статични членове и наследяване:} Статичните членове \textbf{не се дублират} в класа-наследник:
+\begin{itemize}
+    \item \textbf{Статични данни:} Едно копие, споделено от базовия клас и всички наследници.
+    \item \textbf{Статични методи:} Могат да се извикват и през наследника. \textbf{Не могат да бъдат виртуални.} Наследник, дефинирал статичен метод със същото име, го \textit{скрива} (hiding), а не го предефинира (overriding).
+\end{itemize}
+
+\textbf{\texttt{static} извън контекста на класове:} Ключовата дума има две допълнителни употреби:
+\begin{itemize}
+    \item \textbf{Модификатор на функция / глобална променлива на ниво файл:} Ограничава видимостта им само до текущата компилационна единица. Двата записа са еквивалентни:
+\begin{lstlisting}
+static void f() { }   // visible only in this translation unit
+
+namespace {           // equivalent: anonymous namespace
+    void f() { }
+}
+\end{lstlisting}
+    \item \textbf{Модификатор на локална променлива вътре във функция:} Инициализира се \textbf{само при първото} влизане и живее на същото място в паметта като глобалните променливи (статична памет), а не на стека.
+\end{itemize}
+
+\end{FlushLeft}
+
+\end{document}
