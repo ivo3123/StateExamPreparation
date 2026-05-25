@@ -1,0 +1,375 @@
+\documentclass{scrartcl}
+\usepackage{graphicx}  % required for inserting images
+
+% for cyrillic and Bulgarian language
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[bulgarian]{babel}
+
+% math packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cancel}
+
+\usepackage{ragged2e}  % adds FlushLeft
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    % caption=Example C++,
+    label={lst:listing-cpp},
+    language=C++,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+}
+\lstset{style=mystyle}
+
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+
+\newtheorem{theorem}{Теорема}
+\newtheorem{definition}{Дефиниция}
+
+\title{Процеси и комуникация между тях в операционната система}
+\author{Ивайло Андреев + Gemini 3 Flash}
+\date{25 май 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\begin{FlushLeft}
+
+\section{Процеси и комуникационни канали --- основни абстракции в ОС}
+
+\subsection{Същност на Операционната система}
+Операционната система (ОС) е системен софтуер, който играе ролята на посредник, позволяващ на потребителските програми да комуникират с хардуера. Тя предоставя две фундаментални свойства:
+\begin{itemize}
+    \item \textbf{Преносимост (Portability):} Програмите се пишат спрямо високо ниво на абстракция, за да могат да се изпълняват на различен физически хардуер без пренаписване на техния изходен код.
+    \item \textbf{Делене на хардуерни ресурси:} ОС разпределя справедливо и защитено ограничените физически ресурси (памет, процесорно време, дисково пространство) между отделните програми.
+\end{itemize}
+
+Основни характеристики на съвременните ОС са \textbf{многозадачност} (multitasking --- едновременно изпълнение на няколко задачи) и \textbf{многопотребителност} (multiuser --- поддръжка на изолация между отделните потребители).
+
+\subsection{Дефиниция на Процес}
+\begin{definition}
+\textbf{Процесът} е основна абстракция в операционната система, която представлява работеща (изпълняваща се) инстанция на някаква програма в реално време.
+\end{definition}
+
+За разлика от програмата, която е статична последователност от команди (файл върху диска), процесът е динамичен обект, който се характеризира със следните атрибути:
+\begin{itemize}
+    \item \textbf{Кой потребител го изпълнява (User ID):} Информация за собственика на процеса, определяща правата му на достъп.
+    \item \textbf{Уникален идентификатор (PID):} Служебно системно число за разграничаване на процесите.
+    \item \textbf{Изпълняван код:} Контекстът на инструкциите, които процесорът изпълнява.
+    \item \textbf{Собствено изолирано пространство от имена (Namespace):} Включва собствена виртуална памет (стек, хип, сегмент с данни) и настройки в рамките на текущата файлова система (например таблица с дескриптори за отворени файлове).
+\end{itemize}
+
+\subsection{Комуникационни канали (IPC)}
+Междупроцесната комуникация (Inter-Process Communication) е механизъм, предоставян от ОС, който позволява на два или повече процеса да обменят информация с \textbf{тяхно съгласие}.
+
+\subsubsection{Функционални изисквания}
+\begin{enumerate}
+    \item \textbf{Взаимно съгласие:} Процесите трябва експлицитно да се съгласят да участват в обмена чрез използване на общи IPC обекти.
+    \item \textbf{Пропускателна способност:} Ефективно пренасяне на големи количества данни с минимално натоварване (overhead) над системата.
+    \item \textbf{Синхронизация:} Осигуряване на механизъм, който гарантира, че данните не се четат, преди да бъдат записани (координация във времето).
+    \item \textbf{Изолация:} Неучастващи в комуникацията процеси не трябва да имат нерегламентиран достъп до обменяната информация.
+\end{enumerate}
+
+\subsubsection{Основни комуникационни абстракции}
+\begin{itemize}
+    \item \textbf{Споделена памет (Shared Memory):} Блок от физическата памет, който се картографира (map-ва) едновременно в адресното пространство на няколко процеса. Изключително бърз метод, тъй като се избягва копирането на данни през ядрото. Контролът и синхронизацията на достъпа (четене/писане) обаче се поемат изцяло от потребителските програми.
+    \item \textbf{Комуникационна тръба (Pipe):} Прост и сигурен абстрактен механизъм за комуникация, работещ на принципа на опашката (\textbf{FIFO} --- First In, First Out). Притежава вградена синхронизация: ако тръбата е празна, четящият процес автоматично се блокира; ако се напълни, пишещият процес се приспива, докато се освободи място.
+\end{itemize}
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\section{Конкурентност и съревнование за ресурси (Race Condition)}
+
+\subsection{Конкурентност срещу истински паралелизъм}
+Начинът на изпълнение на конкурентните процеси зависи от хардуера:
+\begin{itemize}
+    \item \textbf{Конкурентност (Concurrency / Псевдо-паралелизъм):} Налична при еднопроцесорни системи ($1$ CPU). Диспечерът на задачите (Scheduler) бързо прекъсва и превключва контекста между процесите, създавайки илюзия за едновременна работа.
+    \item \textbf{Истински паралелизъм (True Parallelism):} Наличен при многоядрени системи. Процесите се изпълняват физически едновременно върху различни процесорни ядра.
+\end{itemize}
+
+\subsection{Съревнование за ресурси (Race Condition)}
+Нека имаме процесите $P$ и $Q$. Всеки от тях съдържа поредица от инструкции:
+\begin{itemize}
+    \item За $P$: инструкции $p_1 < p_2 < p_3$ (където $p_1$ се изпълнява хронологично преди $p_2$).
+    \item За $Q$: инструкции $q_1 < q_2 < q_3$.
+\end{itemize}
+Понеже Диспечерът на операционната система може произволно да прекъсва изпълнението на всеки от тях, ние знаем вътрешната наредба на $p$-инструкциите и $q$-инструкциите поотделно, но \textbf{не знаем как те ще се преплетат взаимно във времето}.
+
+\begin{definition}
+\textbf{Race Condition (Съревнование за ресурси)} е ситуация, при която крайната стойност на споделен ресурс зависи от конкретния (непредвидим) ред на преплитане и изпълнение на инструкциите на конкурентните процеси от страна на Диспечера.
+\end{definition}
+
+Участъкът от програмата, в който се достъпва споделеният ресурс и където неконтролираното прекъсване е критично, се нарича \textbf{критична секция} (Critical Section).
+
+\subsubsection{Пример за Race Condition (от лекцията на Тео)}
+Нека споделената променлива е дефинирана като \lstinline|int a = 3;| в паметта.
+Процесът $P$ изпълнява операция по увеличаване с $1$, а процесът $Q$ --- с $10$. На машинно ниво тези операции не са неделими (атомарни). Те се състоят от три стъпки: четене в локален регистър (\lstinline|temp|), модификация и обратно записване.
+
+\begin{minipage}{0.45\textwidth}
+\textbf{Процес P:}
+\begin{lstlisting}[language=C++]
+temp_P = a;
+temp_P = temp_P + 1;
+a = temp_P;
+\end{lstlisting}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\textbf{Процес Q:}
+\begin{lstlisting}[language=C++]
+temp_Q = a;
+temp_Q = temp_Q + 10;
+a = temp_Q;
+\end{lstlisting}
+\end{minipage}
+
+\vspace{0.3cm}
+
+\textbf{Некоректен сценарий на преплитане:}
+\begin{enumerate}
+    \item $P$ прочита стойността на \lstinline|a|: \lstinline|temp_P = a| (стойност $3$).
+    \item \textit{Диспечерът прекъсва процеса P и стартира Q!}
+    \item $Q$ прочита същата стойност на \lstinline|a|: \lstinline|temp_Q = a| (стойност $3$).
+    \item $Q$ модифицира стойността: \lstinline|temp_Q = 3 + 10 = 13|.
+    \item $Q$ записва стойността обратно: \lstinline|a = temp_Q| (в паметта \lstinline|a| става $13$).
+    \item \textit{Диспечерът прекъсва Q и връща управлението на P!}
+    \item $P$ продължава от мястото на прекъсване: \lstinline|temp_P = 3 + 1 = 4|.
+    \item $P$ записва стойността: \lstinline|a = temp_P| (в паметта \lstinline|a| става $4$).
+\end{enumerate}
+\textbf{Краен резултат:} \lstinline|a = 4|. Промяната на процес $Q$ е изцяло презаписана и загубена поради Race Condition. При коректно (последователно) изпълнение крайният резултат трябва да бъде $14$.
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\section{Хардуерна защита на ресурс и Spinlock}
+
+\subsection{Атомарни инструкции}
+За осигуряване на взаимно изключване в критичната секция са необходими специални \textbf{атомарни} (неделими на хардуерно ниво) процесорни инструкции. Те се изпълняват в един единствен шинен такт без възможност за прекъсване. Примери са:
+\begin{itemize}
+    \item \lstinline|test-and-set| --- чете текущата стойност на флага и едновременно с това записва нова стойност \lstinline|true|.
+    \item \lstinline|compare-and-swap| --- сравнява текущата стойност с очаквана и я променя само при съвпадение.
+\end{itemize}
+
+\subsection{Синхронизация чрез Spinlock (Въртяща се ключалка)}
+\textbf{Spinlock} е нисконивоев синхронизационен примитив, при който чакащият процес се върти в непрекъснат празен цикъл (активно чакане), докато заключената променлива стане свободна.
+
+\subsubsection{Реализация на Spinlock (Псевдокод)}
+Нека имаме глобална споделена променлива: \lstinline|bool locked = false;|
+
+\begin{lstlisting}[language=C++]
+// Request to enter critical section
+void lock() {
+    // test_and_set atomically returns the old value of locked
+    // and sets it to true. If it was true, we keep waiting.
+    while (test_and_set(&locked)) {
+        // busy waiting - do nothing
+    }
+}
+
+// Exit critical section
+void unlock() {
+    locked = false;
+}
+\end{lstlisting}
+
+\subsubsection{Оценка на Spinlock}
+\begin{itemize}
+    \item \textbf{Предимства:} Няма софтуерно закъснение за превключване на контекста (context switch) в операционната система. Изключително бърза реакция при освобождаване.
+    \item \textbf{Недостатъци:} Изразходва огромно количество процесорни цикли и енергия. Напълно неприложим на едноядрени системи, защото въртящият се процес не позволява на процеса, който държи ключалката, да получи процесорно време и да я освободи.
+\end{itemize}
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\section{Синхронизация от високо ниво --- Семафор}
+
+За да се избегне активното чакане на Spinlock при по-продължително блокирани ресурси, управлението се поема от Диспечера (Scheduler) на операционната система.
+
+\subsection{Жизнен цикъл на процесите и Диспечер}
+Диспечерът превключва състоянието на процесите между три основни фази:
+\begin{enumerate}
+    \item \textbf{Ready (Готов):} Процесът чака да му бъде заделено процесорно време.
+    \item \textbf{Running (Изпълняващ се):} Процесът се изпълнява върху процесора в момента.
+    \item \textbf{Blocked/Sleeping (Блокиран/Спящ):} Процесът чака събитие (В/И операция или освобождаване на ресурс) и не получава никакви CPU цикли.
+\end{enumerate}
+
+ОС предоставя две системни повиквания за промяна на състоянието:
+\begin{itemize}
+    \item \lstinline|block()| --- приспива текущия изпълняващ се процес (премества го вBlocked състояние).
+    \item \lstinline|wakeup(P)| --- събужда конкретен процес $P$ (премества го в Ready състояние).
+\end{itemize}
+
+\subsection{Семафор (Semaphore)}
+Семафорът е абстрактен обект за синхронизация от високо ниво, съдържащ:
+\begin{itemize}
+    \item Целочислен брояч (\lstinline|counter|), показващ броя на свободните единици от даден ресурс.
+    \item Опашка от спящи процеси (\lstinline|queue|), чакащи за този ресурс.
+\end{itemize}
+
+\begin{definition}
+\textbf{Силен семафор (Strong Semaphore)} е такъв семафор, при който опашката от спящи процеси е строго приоритетна (например FIFO опашка). Той гарантира, че няма да се стигне до системно „гладуване“ (starvation) на никой от процесите.
+\end{definition}
+
+Семафорът поддържа две атомарни операции: \lstinline|wait()| (известна като $P$) и \lstinline|signal()| (известна като $V$).
+
+\subsubsection{Операция wait()}
+Намалява стойността на брояча. Ако стойността стане отрицателна, процесът се приспива.
+\begin{lstlisting}[language=C++]
+void wait(Semaphore S) {
+    S.counter--;
+    if (S.counter < 0) {
+        // Add the current process to S.queue
+        block(); // Put the process to sleep
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Операция signal()}
+Увеличава стойността на брояча. Ако след увеличението стойността все още е по-малка или равна на $0$, това означава, че има спящи процеси в опашката и първият от тях се събужда.
+\begin{lstlisting}[language=C++]
+void signal(Semaphore S) {
+    S.counter++;
+    if (S.counter <= 0) {
+        // Remove process P from S.queue
+        wakeup(P); // Wake up process P
+    }
+}
+\end{lstlisting}
+
+\textit{Забележка:} Когато броячът \lstinline|S.counter| е отрицателно число (например $-k$), неговата абсолютна стойност $|S.counter| = k$ съвпада с точния брой на блокираните процеси в опашката.
+
+\subsection{Мъртва хватка (Deadlock)}
+При некоректно използване на мютекси и семафори може да се стигне до състояние на \textbf{Deadlock} (Мъртва хватка).
+
+\begin{definition}
+\textbf{Deadlock} е системна ситуация, при която два или повече процеса не могат да прогресират никога, тъй като всеки от тях е блокиран и чака освобождаването на ресурс, държан от някой друг от същите чакащи процеси.
+\end{definition}
+
+Ако имаме два процеса $P$ и $Q$ и два семафора $A = 1$, $B = 1$:
+\begin{itemize}
+    \item $P$ заема първо $A$, а след това чака за $B$.
+    \item $Q$ заема първо $B$, а след това чака за $A$.
+\end{itemize}
+Ако $P$ вземе $A$, а диспечерът веднага превключи на $Q$, който вземе $B$, и двата процеса ще заспят взаимно на следващите си стъпки, чакайки ресурси, които никога няма да бъдат освободени.
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\section{Реализация на комуникационна тръба (Pipe) с размер $n$ чрез семафори}
+
+Това е практическо решение на класическия проблем за \textbf{Производител-Потребител (Producer-Consumer)} с ограничена опашка от $n$ елемента.
+
+За да се позволи максимално бързо едновременно четене и писане от няколко процеса (без конфликти), в синхронизационната схема се използват два отделни мютекса:
+\begin{itemize}
+    \item \lstinline|mutex_write| --- защитава операцията по добавяне в опашката от други пишещи процеси.
+    \item \lstinline|mutex_read| --- защитава операцията по вземане от опашката от други четящи процеси.
+\end{itemize}
+
+Останалите два семафора служат за следене на капацитета:
+\begin{itemize}
+    \item \lstinline|free_bytes| --- инициализира се с капацитета $n$. Намалява при добавяне на елемент.
+    \item \lstinline|ready_bytes| --- инициализира се с $0$. Увеличава се при добавяне и показва колко байта са готови за четене.
+\end{itemize}
+
+\subsection{Псевдокод на решението}
+
+\begin{lstlisting}[language=C++]
+// Global objects and initialization
+Semaphore free_bytes  = n; // Initially there are n free slots in the buffer
+Semaphore ready_bytes = 0; // Initially there are no ready data
+Semaphore mutex_write = 1; // Mutex for writing processes
+Semaphore mutex_read  = 1; // Mutex for reading processes
+
+Queue Q; // Shared queue storing up to n elements
+\end{lstlisting}
+
+\subsubsection{Процес Производител (Producer)}
+\begin{lstlisting}[language=C++]
+void Producer(Data item) {
+    wait(free_bytes);      // Check for free slot; if none, go to sleep
+    wait(mutex_write);     // Enter critical section for adding to the queue
+
+    // --- CRITICAL SECTION ---
+    Q.push(item);
+    // ------------------------
+
+    signal(mutex_write);    // Exit critical section for writing
+    signal(ready_bytes);   // Signal that a new item is ready for reading
+}
+\end{lstlisting}
+
+\subsubsection{Процес Потребител (Consumer)}
+\begin{lstlisting}[language=C++]
+Data Consumer() {
+    Data item;
+    wait(ready_bytes);     // Check for available data; if none, go to sleep
+    wait(mutex_read);      // Enter critical section for reading from the queue
+
+    // --- CRITICAL SECTION ---
+    item = Q.pop();
+    // ------------------------
+
+    signal(mutex_read);     // Exit critical section for reading
+    signal(free_bytes);    // Signal that a slot has been freed in the buffer
+
+    return item;
+}
+\end{lstlisting}
+
+\subsection{Критичен анализ на Deadlock (Мъртва хватка) при размяна на wait()}
+Изключително важна особеност на решението е, че \textbf{проверката за капацитет} (\lstinline|wait(free_bytes)| / \lstinline|wait(ready_bytes)|) \textbf{задължително} трябва да се случи \textbf{преди} заемането на критичните секции (\lstinline|wait(mutex_write)| / \lstinline|wait(mutex_read)|).
+
+Нека илюстрираме какво би се случило при некоректна размяна в кода на Производителя (при използване на общ защитен мютекс \lstinline|m| за опашката):
+
+\begin{lstlisting}[language=C++]
+// INCORRECT IMPLEMENTATION (leads to Deadlock!):
+void Bad_Producer(Data item) {
+    wait(m);              // Lock the queue
+    wait(free_bytes);     // Check for free slot
+    
+    Q.push(item);
+    
+    signal(m);
+    signal(ready_bytes);
+}
+\end{lstlisting}
+
+\textbf{Сценарий за Deadlock:}
+\begin{enumerate}
+    \item Опашката \lstinline|Q| е пълна до своя капацитет $n$ (т.е. \lstinline|free_bytes.counter = 0|).
+    \item Пристига Производител $P$. Той изпълнява успешно \lstinline|wait(m)| и заключва споделения буфер.
+    \item След това $P$ извиква \lstinline|wait(free_bytes)|. Тъй като няма свободни места, броячът става $-1$ и процесът $P$ се приспива (\lstinline|block()|).
+    \item В този момент пристига Потребител $C$, който иска да прочете елемент и да освободи място. За да прочете елемент обаче, той трябва първо да изпълни \lstinline|wait(m)|.
+    \item Тъй като мютексът \lstinline|m| се държи от заспалия Производител $P$, Потребителят $C$ също се приспива, чакайки \lstinline|m| да се освободи.
+\end{enumerate}
+И двата процеса са трайно блокирани и никога няма да излязат от това състояние --- настъпил е \textbf{Deadlock}.
+
+\end{FlushLeft}
+
+\end{document}
