@@ -51,7 +51,7 @@
 
 \title{Бази от данни - релационен модел на данните}
 \author{Ивайло Андреев + chat gpt 5.5, DeepSeek-V3, gemini 3 Flash}
-\date{9 май 2026}
+\date{25 май 2026}
 
 \begin{document}
 
@@ -299,13 +299,15 @@ END;
 
 \subsection{Основни операции}
 
+Основните операции в Релационната алгебра образуват базис и всички останали операции могат да се изразят чрез базисните.
+
 \subsubsection{Обединение (Union)}
 
 \begin{definition}
 \textbf{\textit{Обединение}} $R \cup S$ на съвместими релации $R$ и $S$ съдържа всички кортежи, които се намират в $R$ или $S$ (или в двете).
 \end{definition}
 
-Свойства: комутативна и асоциативна.
+Свойства: бинарна, комутативна, асоциативна.
 
 \begin{lstlisting}[language=SQL, caption=UNION]
 SELECT employee_id, name FROM full_time_employees
@@ -319,7 +321,7 @@ SELECT employee_id, name FROM part_time_employees;
 \textbf{\textit{Разлика}} $R \setminus S$ съдържа всички кортежи на $R$, които не се намират в $S$.
 \end{definition}
 
-Свойства: некомутативна.
+Свойства: бинарна, некомутативна.
 
 \begin{lstlisting}[language=SQL, caption=EXCEPT or MINUS]
 SELECT employee_id, name FROM all_employees
@@ -330,13 +332,15 @@ SELECT employee_id, name FROM terminated_employees;
 \subsubsection{Проекция (Projection)}
 
 \begin{definition}
-\textbf{\textit{Проекция}} $\pi_{A_{i_1}, \ldots, A_{i_k}}(R)$ на релация $R$ със атрибути $\{A_1, \ldots, A_n\}$ е релация, съдържаща само избраните атрибути $\{A_{i_1}, \ldots, A_{i_k}\}$.
+\textbf{\textit{Проекция}} $\pi_{A_{i_1}, \ldots, A_{i_k}}(R)$ на релация $R$ с атрибути $\{A_1, \ldots, A_n\}$ е релация, съдържаща само избраните атрибути $\{A_{i_1}, \ldots, A_{i_k}\}$.
 \end{definition}
 
-Е еквивалентна на SQL SELECT с определени колони.
+Еквивалентна е на SQL операцията SELECT с избрани колони.
+
+Ако проекцията не съдържа ключови атрибути, в SQL могат да възникнат дублиращи се редове, затова за пълна еквивалентност с релационната алгебра често се използва DISTINCT.
 
 \begin{lstlisting}[language=SQL, caption=Projection (SELECT)]
-SELECT first_name, last_name
+SELECT DISTINCT first_name, last_name
 FROM Employees;
 \end{lstlisting}
 
@@ -354,20 +358,6 @@ FROM Employees
 WHERE salary > 50000 AND department_id = 2;
 \end{lstlisting}
 
-\subsubsection{Декартово произведение (Cartesian Product)}
-
-\begin{definition}
-\textbf{\textit{Декартово произведение}} $R \times S$ съдържа всички възможни комбинации на кортежи от $R$ с кортежи от $S$.
-\end{definition}
-
-Ако $R$ има $m$ редове и $S$ има $n$ редове, $R \times S$ има $m \times n$ редове.
-
-\begin{lstlisting}[language=SQL, caption=Cartesian product]
-SELECT e.employee_id, d.department_id
-FROM Employees e, Departments d;
--- Or: FROM Employees e CROSS JOIN Departments d;
-\end{lstlisting}
-
 \subsubsection{Преименуване (Renaming)}
 
 \begin{definition}
@@ -377,6 +367,22 @@ FROM Employees e, Departments d;
 \begin{lstlisting}[language=SQL, caption=Renaming]
 SELECT e.employee_id AS emp_id, e.first_name AS name
 FROM Employees AS e;
+\end{lstlisting}
+
+\subsubsection{Декартово произведение (Cartesian Product)}
+
+\begin{definition}
+\textbf{\textit{Декартово произведение}} $R \times S$ съдържа всички възможни комбинации на кортежи от $R$ с кортежи от $S$.
+\end{definition}
+
+Ако $R$ има $m$ редове и $S$ има $n$ редове, $R \times S$ има $m \times n$ редове.
+
+В релационната алгебра атрибути с едно и също име в различни релации трябва формално да се преименуват преди декартовото произведение между тях. В SQL това е позволено, но при проекция трябва да се уточни към коя таблица принадлежи колоната.
+
+\begin{lstlisting}[language=SQL, caption=Cartesian product]
+SELECT e.employee_id, d.department_id
+FROM Employees e, Departments d;
+-- Or: FROM Employees e CROSS JOIN Departments d;
 \end{lstlisting}
 
 \subsection{Допълнителни операции}
@@ -425,10 +431,12 @@ JOIN Departments USING (department_id);
 \subsubsection{Частно (Division)}
 
 \begin{definition}
-\textbf{\textit{Частното}} $R \div S$ (където $S$ има подмножество на атрибутите на $R$) съдържа всички кортежи от $\pi_{\text{остатък}}(R)$, за които всяка комбинация с кортежи от $S$ съществува в $R$.
+\textbf{\textit{Частно}} $R \div S$ (където атрибутите на $S$ са подмножество от атрибутите на $R$) е релация, съдържаща всички кортежи от $\pi_{\text{останалите атрибути}}(R)$, за които всяка комбинация с кортеж от $S$ съществува в $R$.
 \end{definition}
 
-Интуиция: Ако $R$ съдържа (student\_id, sport) и $S$ съдържа (sport), то $R \div S$ дава студентите, които правят ВСЕ спортове в $S$.
+Частното е свързано с декартовото произведение в смисъл, че ако $R \div S = T$, то винаги е в сила включването $T \times S \subseteq R$. Равенството $T \times S = R$ е изпълнено само при специален случай, когато $R$ съдържа всички комбинации между кортежите на $T$ и $S$.
+
+Интуиция: Ако $R$ съдържа $(student\_id, sport)$, а $S$ съдържа $(sport)$, то $R \div S$ дава студентите, които практикуват всички спортове в $S$.
 
 \textit{Пример:}
 
@@ -468,7 +476,7 @@ student\_id \\
 \end{tabular}
 \end{center}
 
-Резултатът съдържа само студент 2, защото той е единственият, който се участва в двата спорта.
+Резултатът съдържа само студент 2, защото той е единственият студент, който практикува всички спортове от релацията Sports.
 
 \end{FlushLeft}
 

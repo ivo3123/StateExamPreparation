@@ -117,7 +117,7 @@ int main() {
 \begin{lstlisting}
 class Shape {
 public:
-    virtual void draw() const = 0;    // pure virtual
+    virtual void draw() const { std::cout << "Drawing shape\n"; }
     virtual ~Shape() = default;       // virtual destructor -- mandatory!
 };
 
@@ -130,28 +130,6 @@ public:
 \end{lstlisting}
 
 \textbf{Ограничения:} Виртуалните функции не могат да бъдат \texttt{static} (нямат \texttt{this} указател). Конструкторите не могат да бъдат виртуални.
-
-\subsection{Механизъм на динамичното свързване (vtable / vptr)}
-
-За всеки клас с поне една виртуална функция компилаторът генерира \textbf{виртуална таблица (vtable)} -- масив от указатели към конкретните виртуални функции. Всеки обект от такъв клас съдържа скрит \textbf{указател към vtable (vptr)}, инициализиран от конструктора.
-
-При извикване \texttt{p->f()} (където \texttt{f} е виртуална) компилаторът генерира код:
-\begin{enumerate}
-    \item Прочети \texttt{vptr} от обекта.
-    \item Намери слота на \texttt{f} във \texttt{vtable}.
-    \item Извикай функцията на намерения адрес.
-\end{enumerate}
-
-\begin{lstlisting}
-// Conceptual memory layout of an object with virtual functions:
-//
-//  [ vptr ] --> vtable of actual class:
-//  [ data ]       [0] -> &ActualClass::f
-//                 [1] -> &ActualClass::g
-//                 ...
-\end{lstlisting}
-
-\textbf{Цена:} Всяко извикване на виртуална функция добавя едно индиректно разкостване (разглеждане на vptr и vtable). Всеки обект с виртуални функции носи допълнителните \texttt{sizeof(void*)} байта за vptr.
 
 \subsection{Пример: динамично свързване при дълбока йерархия}
 
@@ -267,13 +245,27 @@ public:
 \section{Масиви от обекти и от указатели към обекти}
 % ============================================================
 
+При работа с наследяване се срещат четири основни варианта на деклариране:
+
+\begin{lstlisting}
+class Base    { public: virtual void f(); virtual ~Base() = default; };
+class Derived : public Base { public: void f() override; };
+
+Base     arr[10];   // array of 10 Base objects by value -- no polymorphism
+Derived  arr[10];   // array of 10 Derived objects by value -- no polymorphism
+Base*    arr;       // pointer to Base -- supports polymorphism (can point to Derived)
+Derived* arr;       // pointer to Derived -- Derived objects only
+\end{lstlisting}
+
+Стойностните масиви (\texttt{Base arr[]} и \texttt{Derived arr[]}) \textbf{не поддържат полиморфизъм} -- при съхранение на производен обект в Base слот настъпва \textbf{object slicing} (виж 3.4). Само масивите от указатели (\texttt{Base* arr[]}) позволяват динамично свързване.
+
 \subsection{Масив от обекти (на стека)}
 
 \begin{lstlisting}
-class Widget { /* ... */ };
+class Car { /* ... */ };
 
-Widget arr[5];   // calls default constructor 5 times
-                 // destructors called automatically when arr goes out of scope
+Car arr[5];   // calls default constructor 5 times
+              // destructors called automatically when arr goes out of scope
 \end{lstlisting}
 
 \textbf{Характеристики:} Обектите са плътно в паметта. Всички елементи се конструират с един и същ конструктор (по подразбиране). Размерът е фиксиран при компилация.
@@ -281,9 +273,9 @@ Widget arr[5];   // calls default constructor 5 times
 \subsection{Динамичен масив от обекти (на heap-а)}
 
 \begin{lstlisting}
-Widget* arr = new Widget[5];  // calls default constructor 5 times
-delete[] arr;                 // calls destructor 5 times, then frees memory
-                              // delete[] -- NOT delete!
+Car* arr = new Car[5];  // calls default constructor 5 times
+delete[] arr;           // calls destructor 5 times, then frees memory
+                        // delete[] -- NOT delete!
 \end{lstlisting}
 
 Размерът може да се определи по време на изпълнение. Изисква \texttt{delete[]} -- \texttt{delete} (без \texttt{[]}) е \textbf{неопределено поведение}.
@@ -291,9 +283,9 @@ delete[] arr;                 // calls destructor 5 times, then frees memory
 \subsection{Масив от указатели към обекти}
 
 \begin{lstlisting}
-Widget* arr[5];               // array of 5 pointers (uninitialized)
-arr[0] = new Widget(42);      // each element independently constructed
-arr[1] = new Widget(7);
+Car* arr[5];               // array of 5 pointers (uninitialized)
+arr[0] = new Car(42);      // each element independently constructed
+arr[1] = new Car(7);
 // ...
 for (int i = 0; i < 5; i++) delete arr[i]; // each element independently destroyed
 \end{lstlisting}
@@ -336,7 +328,7 @@ for (int i = 0; i < 2; i++) {
 }
 \end{lstlisting}
 
-\textbf{Задължително:} Деструкторът на базовия клас трябва да е \texttt{virtual}, за да се извикат правилните деструктори на наследниците при \texttt{delete zoo[i]}.
+\textbf{Задължително:} Деструкторът на базовия клас трябва да е \texttt{virtual}, за да се извикат правилните деструктори на наследниците при \texttt{delete arr[i]}.
 
 % ============================================================
 \section{Параметричен полиморфизъм. Шаблони на функция и на клас.}
@@ -367,28 +359,30 @@ int main() {
 
 \begin{lstlisting}
 template <typename T>
-class Stack {
+class Array {
 public:
-    void push(const T& val) { data[top++] = val; }
-    T pop()                 { return data[--top]; }
-    bool empty() const      { return top == 0; }
+    Array(int n) : size_(n), data_(new T[n]) { }
+    ~Array() { delete[] data_; }
+    T& operator[](int i) { return data_[i]; }
+    int size() const     { return size_; }
 private:
-    T data[100];
-    int top = 0;
+    int  size_;
+    T*   data_;
 };
 
 int main() {
-    Stack<int> intStack;
-    intStack.push(1);
-    intStack.push(2);
-    std::cout << intStack.pop(); // 2
+    Array<int> nums(5);
+    nums[0] = 10;
+    std::cout << nums.size(); // 5
 
-    Stack<std::string> strStack;
-    strStack.push("hello");
+    Array<std::string> words(3);
+    words[0] = "hello";
 }
 \end{lstlisting}
 
 \subsection{Нетипови параметри на шаблон}
+
+\texttt{Array<T>} от предишната секция използва динамична памет (heap). Параметрите на шаблона могат да бъдат и конкретни стойности (\textbf{нетипови параметри}), което позволява размерът да е известен при компилация -- тогава масивът е на стека, без heap заделяне. \texttt{Array<T, N>} по-долу е \textbf{различна дефиниция}, не предефиниране на същата.
 
 Параметрите на шаблон могат да бъдат и конкретни стойности (не само типове):
 
@@ -417,6 +411,8 @@ const char* sum(const char* a, const char* b) {  // specialization for char*
     // custom string concatenation logic
 }
 \end{lstlisting}
+
+\textbf{Специализация от стандартната библиотека:} \texttt{std::vector<bool>} е специализация на \texttt{std::vector<T>} -- вместо масив от \texttt{bool} стойности, елементите се пакетират побитово (\textbf{bitset оптимизация по памет}: 1 бит на елемент вместо 1 байт). Заради тази оптимизация обаче \texttt{operator[]} не връща \texttt{bool\&}, а proxy обект, което нарушава стандартните очаквания за контейнер и е считано за проектна грешка.
 
 \subsection{Ограничение: дефиниции в хедър файл}
 
