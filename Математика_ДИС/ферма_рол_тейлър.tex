@@ -47,6 +47,8 @@
 \lstset{style=mystyle}
 
 \usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
 
 \newtheorem{theorem}{Теорема}
 \newtheorem{definition}{Дефиниция}
@@ -56,7 +58,7 @@
 \newtheorem{remark}{Забележка}
 
 \title{ДИС - Теорема на Ферма. Теорема за средни стойности. Формула на Тейлър}
-\author{Ивайло Андреев + gemini 3 Flash}
+\author{Ивайло Андреев + gemini 3 Flash, Claude Sonnet 4.6, chat gpt 5.5}
 \date{16 май 2026}
 
 \begin{document}
@@ -146,6 +148,45 @@
 \end{theorem}
 
 \begin{proof}
+Геометричният смисъл е показан по-долу за двата случая в доказателството:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.1]
+  % Case 1: constant function
+  \begin{scope}[xshift=0cm]
+    \draw[-{Stealth}] (-0.3,0) -- (4,0) node[right] {$x$};
+    \draw[-{Stealth}] (0,-0.3) -- (0,2.5) node[above] {$y$};
+    \draw[blue, thick] (0.5,1.5) -- (3.5,1.5);
+    \filldraw (0.5,1.5) circle (1.5pt);
+    \filldraw (3.5,1.5) circle (1.5pt);
+    \draw[dashed] (0.5,0) node[below] {$a$} -- (0.5,1.5);
+    \draw[dashed] (3.5,0) node[below] {$b$} -- (3.5,1.5);
+    \node[left] at (0,1.5) {$c$};
+    \draw[dashed] (0,1.5) -- (0.5,1.5);
+    \node[below, align=center] at (2,-0.6) {Случай 1: $f = \text{const}$,\\ $f'(x) = 0$ навсякъде};
+  \end{scope}
+  % Case 2: function with visible extremum
+  \begin{scope}[xshift=5.5cm]
+    \draw[-{Stealth}] (-0.3,0) -- (4,0) node[right] {$x$};
+    \draw[-{Stealth}] (0,-0.3) -- (0,2.5) node[above] {$y$};
+    \draw[blue, thick] plot[domain=0.5:3.5, samples=60]
+      (\x, {0.9 + 1.4*sin(deg(3.14159*( \x - 0.5)/3))});
+    \filldraw (0.5,0.9) circle (1.5pt);
+    \filldraw (3.5,0.9) circle (1.5pt);
+    \draw[dashed] (0.5,0) node[below] {$a$} -- (0.5,0.9);
+    \draw[dashed] (3.5,0) node[below] {$b$} -- (3.5,0.9);
+    % maximum point
+    \draw[dashed] (2,0) node[below] {$c$} -- (2,2.3);
+    \filldraw[red] (2,2.3) circle (1.5pt) node[above] {$M$};
+    % horizontal tangent
+    \draw[red, thick] (1.2,2.3) -- (2.8,2.3) node[right] {$f'(c)=0$};
+    \node[below, align=center] at (2,-0.6) {Случай 2: $m < M$,\\ екстремумът е вътрешен};
+  \end{scope}
+\end{tikzpicture}
+\caption{Геометричен смисъл на теоремата на Рол — Случай 1: $f = \mathrm{const}$, $f' \equiv 0$; Случай 2: екстремумът се достига във вътрешна точка $c$, откъдето $f'(c) = 0$}
+\end{figure}
+
 Тъй като $f(x)$ е непрекъсната в затворения интервал $[a, b]$, съгласно Теоремата на Вайерщрас тя достига своя минимум $m$ и своя максимум $M$ в този интервал. Нека:
 \[ m = \min_{x \in [a, b]} f(x) = f(x_1), \quad M = \max_{x \in [a, b]} f(x) = f(x_2) \quad (x_1, x_2 \in [a, b]) \]
 
@@ -156,7 +197,7 @@
     Ако минимумът е равен на максимума, то функцията е константа в целия интервал: $f(x) = c = \text{const}$ за всяко $x \in [a, b]$. Тогава нейната производна е нула във всяка точка от интервала: $f'(x) = 0$. В този случай всяка точка от отворения интервал $(a, b)$ може да бъде избрана за точка $c$.
     
     \item \textbf{Случай 2:} $m < M$.
-    Тъй като по условие $f(a) = f(b)$, не е възможно и двете стойности $m$ и $M$ да се достигат едновременно в краищата на интервала. Следователно, поне една от двете стойности (или минимумът $m$, или максимумът $M$) се достига във вътрешна точка $c \in (a, b)$.
+    Тъй като по условие $f(a) = f(b)$, не е възможно и двете стойности $m$ и $M$ да се достигат едновременно в краищата на интервала. Наистина, ако и $m$, и $M$ се достигаха само в краищата, то от $f(a) = f(b)$ би следвало $m = M$, което противоречи на предположението $m < M$. Следователно, поне една от двете стойности (или минимумът $m$, или максимумът $M$) се достига във вътрешна точка $c \in (a, b)$.
     
     Тъй като $c$ е вътрешна точка на интервала, тя се явява точка на локален екстремум (локален минимум или локален максимум) за функцията $f$. Освен това, по условие функцията е диференцируема в отворения интервал $(a, b)$, следователно тя е диференцируема и в точката $c$. 
     
@@ -176,6 +217,45 @@
 \end{theorem}
 
 \begin{proof}
+Геометричният смисъл е показан по-долу — теоремата гарантира \textbf{поне една} вътрешна точка $c$, в която наклонът на допирателната съвпада с наклона на секущата между $(a, f(a))$ и $(b, f(b))$ (в примера по-долу се виждат две такива точки $c_1$ и $c_2$):
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.2]
+  \draw[-{Stealth}] (-0.3,0) -- (5.5,0) node[right] {$x$};
+  \draw[-{Stealth}] (0,-0.3) -- (0,3.2) node[above] {$y$};
+  % curve: f(x) = 0.18*(x-0.6)*(x-4.4)*(x-2.5) + 0.5*(x-0.6) + 0.8
+  % f(0.6) = 0.8,  f(4.4) = 2.7
+  \draw[blue, thick] plot[domain=0.6:4.4, samples=80]
+    (\x, {0.18*(\x-0.6)*(\x-4.4)*(\x-2.5) + 0.5*(\x-0.6) + 0.8});
+  % endpoints A=(0.6, 0.8)  B=(4.4, 2.7)
+  \coordinate (A) at (0.6, 0.8);
+  \coordinate (B) at (4.4, 2.7);
+  \filldraw (A) circle (1.5pt);
+  \filldraw (B) circle (1.5pt);
+  \draw[dashed] (0.6,0) node[below] {$a$} -- (A);
+  \draw[dashed] (4.4,0) node[below] {$b$} -- (B);
+  \draw[dashed] (0,0.8) node[left] {$f(a)$} -- (A);
+  \draw[dashed] (0,2.7) node[left] {$f(b)$} -- (B);
+  % secant: y = 0.5x + 0.5  (passes exactly through A and B)
+  \draw[gray, thick] (0.0, 0.5) -- (5.0, 3.0) node[right] {секуща};
+
+  % f'(x) = slope of secant = 0.5  at  c1≈1.4  and  c2≈3.6
+  % f(1.4)  = 0.18*(0.8)*(-3)*(-1.1) + 0.5*0.8 + 0.8 = 0.4752+1.2 = 1.6752
+  % f(3.6)  = 0.18*(3)*(-0.8)*(1.1) + 0.5*3 + 0.8   = -0.4752+2.3 = 1.8248
+  % tangent at c1=(1.4, 1.6752): y = 0.5x + 0.9752
+  \filldraw[red] (1.4, 1.6752) circle (1.5pt);
+  \draw[dashed] (1.4, 0) node[below] {$c_1$} -- (1.4, 1.6752);
+  \draw[red, thick] (0.5, 1.2252) -- (2.3, 2.1252);
+  % tangent at c2=(3.6, 1.8248): y = 0.5x + 0.0248
+  \filldraw[red] (3.6, 1.8248) circle (1.5pt);
+  \draw[dashed] (3.6, 0) node[below] {$c_2$} -- (3.6, 1.8248);
+  \draw[red, thick] (2.7, 1.375) -- (4.5, 2.275)
+    node[right] {$f'(c) = \dfrac{f(b)-f(a)}{b-a}$};
+\end{tikzpicture}
+\caption{Геометричен смисъл на теоремата на Лагранж — теоремата гарантира поне една точка $c$; в примера са видими две: $c_1$ и $c_2$}
+\end{figure}
+
 За доказателството ще използваме метода на помощната функция, като я конструираме така, че за нея да са изпълнени условията на теоремата на Рол.
 
 Нека дефинираме числото $k$, представляващо наклона на секущата през краищата на графиката:
@@ -211,6 +291,31 @@
 \end{theorem}
 
 \begin{proof}
+Геометричният смисъл на теоремата на Коши се разкрива чрез параметричната крива $(g(t), f(t))$ във \textbf{фазовата равнина}: нека $A = (g(a), f(a))$ и $B = (g(b), f(b))$ са краищата на кривата, а $C = (g(c), f(c))$ е вътрешна точка, в която допирателната е паралелна на секущата $AB$.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.5]
+  \draw[-{Stealth}] (-0.3,0) -- (2.8,0) node[right] {$g(x)$};
+  \draw[-{Stealth}] (0,-0.3) -- (0,1.8) node[above] {$f(x)$};
+  % parametric curve (2cos(t), sin(t)) -- quarter ellipse
+  \draw[blue, thick] plot[domain=0:90, samples=60]
+    ({2*cos(\x)}, {sin(\x)});
+  \draw[-{Stealth}, blue, thick] ({2*cos(48)}, {sin(48)}) -- ({2*cos(50)}, {sin(50)});
+  % endpoints
+  \filldraw (2,0) circle (1.2pt) node[below] {$A$};
+  \filldraw (0,1) circle (1.2pt) node[left] {$B$};
+  % secant through A=(2,0) and B=(0,1): y = -x/2 + 1
+  \draw[gray, thick] (-0.1, 1.05) -- (2.3, -0.15);
+  % tangent point C = (sqrt(2), sqrt(2)/2), tangent: y = -x/2 + sqrt(2)
+  \filldraw[red] ({sqrt(2)}, {sqrt(2)/2}) circle (1.2pt) node[above=2pt] {$C$};
+  \draw[dashed] ({sqrt(2)}, 0) -- ({sqrt(2)}, {sqrt(2)/2});
+  \draw[dashed] (0, {sqrt(2)/2}) -- ({sqrt(2)}, {sqrt(2)/2});
+  \draw[red, thick] (0.3, {-0.15 + sqrt(2)}) -- (2.2, {-1.1 + sqrt(2)});
+\end{tikzpicture}
+\caption{Геометричен смисъл на теоремата на Коши — в точката $C$ допирателната е паралелна на секущата $AB$, откъдето $\frac{f'(c)}{g'(c)} = \frac{f(b)-f(a)}{g(b)-g(a)}$}
+\end{figure}
+
 Доказателството се състои от две задължителни логически стъпки съгласно изискванията на конспекта.
 
 \textbf{Стъпка 1: Доказателство, че знаменателят $g(b) - g(a) \neq 0$.}
@@ -233,7 +338,7 @@
 
 Прилагаме теоремата на Рол за $H(x)$ в интервала $[a, b]$, откъдето следва, че съществува точка $c \in (a, b)$, за която $H'(c) = 0$:
 \[ H'(c) = f'(c) - \lambda \cdot g'(c) = 0 \quad \Rightarrow \quad f'(c) = \frac{f(b) - f(a)}{g(b) - g(a)} \cdot g'(c) \]
-Тъй като по условие $g'(c) \neq 0$, можем да разделим двете страни на $g'(c)$ и получаваме окончателния вид на теоремата на Коши:
+Понеже $c \in (a, b)$, от условието $g'(x) \neq 0$ за всяко $x \in (a, b)$ следва $g'(c) \neq 0$. Следователно можем да разделим двете страни на $g'(c)$ и получаваме окончателния вид на теоремата на Коши:
 \[ \frac{f(b) - f(a)}{g(b) - g(a)} = \frac{f'(c)}{g'(c)} \]
 С това теоремата е напълно доказана.
 \end{proof}
@@ -297,6 +402,75 @@
 \[ R_n(x) = \frac{f^{(n+1)}(c)}{(n+1)!}(x - x_0)^{n+1} \]
 С това формулата на Тейлър с остатъчен член във формата на Лагранж е напълно изведена и доказана.
 \end{proof}
+
+\begin{example}[Развиване на $\sin x$ в ред на Тейлър около $x_0 = 0$]
+Пресмятаме производните на $f(x) = \sin x$ в $x_0 = 0$:
+\[
+f(0)=0,\quad f'(0)=1,\quad f''(0)=0,\quad f'''(0)=-1,\quad f^{(4)}(0)=0,\quad \ldots
+\]
+Производните се повтарят с период 4. Тъй като $\sin x$ е \textbf{нечетна функция}, всички четни производни в $0$ са нула, т.е. в реда участват само нечетни степени. Заместваме в полинома на Тейлър:
+\[
+\sin x = \sum_{k=0}^{\infty} \frac{(-1)^k}{(2k+1)!}\, x^{2k+1}
+       = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \frac{x^7}{7!} + \cdots
+\]
+Четирите последователни ненулеви приближения са:
+\begin{align*}
+T_1(x) &= x \\[3pt]
+T_3(x) &= x - \dfrac{x^3}{6} \\[3pt]
+T_5(x) &= x - \dfrac{x^3}{6} + \dfrac{x^5}{120} \\[3pt]
+T_7(x) &= x - \dfrac{x^3}{6} + \dfrac{x^5}{120} - \dfrac{x^7}{5040}
+\end{align*}
+
+Всяко следващо приближение „следи" $\sin x$ в по-широка околност на $x_0 = 0$:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.75]
+  \draw[-{Stealth}] (-4.6,0) -- (4.6,0) node[right] {$x$};
+  \draw[-{Stealth}] (0,-4.5) -- (0,4.5) node[above] {$y$};
+  % light grid
+  \foreach \x in {-4,-3,-2,-1,1,2,3,4}
+    \draw[gray!20] (\x,-4.3) -- (\x,4.3);
+  \foreach \y in {-4,-3,-2,-1,1,2,3,4}
+    \draw[gray!20] (-4.3,\y) -- (4.3,\y);
+  % tick marks
+  \foreach \x in {-4,-3,-2,-1,1,2,3,4}
+    \draw (\x,1.5pt) -- (\x,-1.5pt) node[below, font=\scriptsize] {$\x$};
+  \foreach \y in {-4,-3,-2,-1,1,2,3,4}
+    \draw (1.5pt,\y) -- (-1.5pt,\y) node[left, font=\scriptsize] {$\y$};
+  % clip all curves to viewport [-4,4]x[-4,4]
+  \begin{scope}
+    \clip (-4,-4) rectangle (4,4);
+    % sin(x) — black
+    \draw[black, very thick] plot[domain=-4:4, samples=120]
+      (\x, {sin(\x r)});
+    % T1(x) = x — red
+    \draw[red, thick] plot[domain=-4:4, samples=30]
+      (\x, {\x});
+    % T3(x) = x - x^3/6,  Horner form: x*(1 - x^2/6) — blue
+    \draw[blue, thick] plot[domain=-4:4, samples=60]
+      (\x, {\x*(1 - \x*\x/6)});
+    % T5(x) = x - x^3/6 + x^5/120,  Horner: x*(1 + x^2*(-1/6 + x^2/120)) — orange
+    \draw[orange, thick] plot[domain=-4:4, samples=80]
+      (\x, {\x*(1 + \x*\x*(-1/6 + \x*\x/120))});
+  \end{scope}
+  % legend
+  \draw[fill=white, draw=gray!60, rounded corners=2pt]
+    (2.1,2.0) rectangle (3.95,3.95);
+  \draw[black, very thick] (2.25,3.7)  -- (2.75,3.7)
+    node[right, font=\footnotesize] {$\sin x$};
+  \draw[red, thick]        (2.25,3.2)  -- (2.75,3.2)
+    node[right, font=\footnotesize] {$T_1$};
+  \draw[blue, thick]       (2.25,2.7)  -- (2.75,2.7)
+    node[right, font=\footnotesize] {$T_3$};
+  \draw[orange, thick]     (2.25,2.2)  -- (2.75,2.2)
+    node[right, font=\footnotesize] {$T_5$};
+\end{tikzpicture}
+\caption{Приближения на Тейлър за $\sin x$ около $x_0=0$:\; $T_1=x$;\; $T_3=x-\tfrac{x^3}{6}$;\; $T_5=x-\tfrac{x^3}{6}+\tfrac{x^5}{120}$}
+\end{figure}
+\end{example}
+
+С нарастването на степента $n$ полиномът $T_n(x)$ дава все по-точно приближение на $f(x)$ в все по-голяма околност на $x_0$ — интуитивно, всяка нова производна „описва" следващо ниво на кривината на графиката.
 
 \end{FlushLeft}
 
