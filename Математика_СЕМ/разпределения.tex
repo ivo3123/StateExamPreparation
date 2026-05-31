@@ -1,0 +1,234 @@
+\documentclass{scrartcl}
+\usepackage{graphicx}  % required for inserting images
+
+% for cyrillic and Bulgarian language
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[bulgarian]{babel}
+
+% math packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cancel}
+
+\usepackage{ragged2e}  % adds FlushLeft
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    language=Octave,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,
+    captionpos=b,
+    keepspaces=false,                 
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    columns=fullflexible,
+}
+
+\lstset{style=mystyle}
+
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=cyan]{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+
+\newtheorem{theorem}{Теорема}
+\newtheorem{definition}{Дефиниция}
+
+\newtheorem{lemma}{Лема}
+\newtheorem{corollary}{Следствие}
+\newtheorem{remark}{Забележка}
+
+\title{Вероятности. Основни разпределения.}
+\author{Ивайло Андреев + gemini 3 Flash}
+\date{31 май 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\begin{FlushLeft}
+
+\section{Основни понятия и свойства на вероятностите}
+
+\subsection{Вероятностно пространство и свойства на вероятността}
+Нека $\Omega$ е непразно множество от всички възможни елементарни изходи от даден случаен експеримент, а $\mathcal{A}$ е $\sigma$-алгебра от подмножества на $\Omega$ (наречени събития). 
+
+\begin{definition}
+Функцията $\mathbb{P}: \mathcal{A} \to [0, 1]$ се нарича \textbf{вероятност}, ако удовлетворява аксиомите на Колмогоров:
+\begin{enumerate}
+    \item \textbf{Неотрицателност}: $\mathbb{P}(A) \ge 0$ за всяко събитие $A \in \mathcal{A}$.
+    \item \textbf{Нормираност}: Вероятността на сигурното събитие $\Omega$ е равна на единица: $\mathbb{P}(\Omega) = 1$.
+    \item \textbf{Счетна адитивност}: За всяка поредица от взаимно изключващи се събития $A_1, A_2, \dots$ ($A_i \cap A_j = \emptyset$ при $i \neq j$) е изпълнено:
+    \[ \mathbb{P}\left(\bigcup_{i=1}^{\infty} A_i\right) = \sum_{i=1}^{\infty} \mathbb{P}(A_i) \]
+\end{enumerate}
+\end{definition}
+
+От тези аксиоми директно произтичат следните основни свойства на вероятностната мярка:
+\begin{itemize}
+    \item \textbf{Адитивност (крайна)}: Ако $A \cap B = \emptyset$, то $\mathbb{P}(A \cup B) = \mathbb{P}(A) + \mathbb{P}(B)$.
+    \item \textbf{Монотонност}: Ако събитието $A$ е подмножество на събитието $B$ ($A \subseteq B$), то $\mathbb{P}(A) \le \mathbb{P}(B)$. Това следва от представянето $B = A \cup (B \setminus A)$, където $A \cap (B \setminus A) = \emptyset$, откъдето $\mathbb{P}(B) = \mathbb{P}(A) + \mathbb{P}(B \setminus A) \ge \mathbb{P}(A)$.
+    \item \textbf{Вероятност на допълнително събитие}: $\mathbb{P}(A^c) = 1 - \mathbb{P}(A)$.
+    \item \textbf{Вероятност на невъзможното събитие}: $\mathbb{P}(\emptyset) = 0$.
+\end{itemize}
+
+\subsection{Дефиниция на дискретно вероятностно разпределение}
+Случайна величина $X$ е измерима функция, дефинирана над пространството от елементарни събития, $X: \Omega \to \mathbb{R}$.
+
+\begin{definition}
+Казваме, че случайната величина $X$ е \textbf{дискретна}, ако нейното множество от стойности $X(\Omega) = \{x_1, x_2, \dots, x_n, \dots\}$ е крайно или изброимо. \textbf{Дискретно вероятностно разпределение} на $X$ се нарича съвкупността от вероятностите $\{p_i\}$, с които величината приема своите стойности:
+\[ p_i = \mathbb{P}(X = x_i), \quad i = 1, 2, \dots \]
+\end{definition}
+
+Дискретната \textbf{функция на разпределение} на $X$ се дефинира като:
+\[ F_X(x) = \mathbb{P}(X \le x) = \sum_{x_i \le x} p_i \]
+
+За да бъде едно разпределение коректно дефинирано, вероятностите $\{p_i\}$ задължително трябва да изпълняват следните две свойства (свойства на разпределението):
+\begin{enumerate}
+    \item \textbf{Неотрицателност}: $p_i \ge 0$ за всяко $i$.
+    \item \textbf{Условие за нормировка}: Сумата от вероятностите на всички възможни изходи трябва да е единица:
+    \[ \sum_{i} p_i = 1 \]
+\end{enumerate}
+
+\subsection{Моменти на случайни величини}
+\begin{definition}
+\textbf{Математическо очакване} (първи начален момент) на дискретна случайна величина $X$ се нарича числото:
+\[ \mathbb{E}X = \sum_{i} x_i p_i \]
+дефинирано при условие, че редът е абсолютно сходящ ($\sum_{i} |x_i| p_i < \infty$).
+\end{definition}
+
+\begin{definition}
+\textbf{Дисперсия} (втори централен момент) на случайна величина $X$ измерва разсейването на стойностите около тяхното математическо очакване и се дефинира като:
+\[ \mathbb{D}X = \mathbb{E}(X - \mathbb{E}X)^2 = \sum_{i} (x_i - \mathbb{E}X)^2 p_i \]
+\end{definition}
+За практически пресмятания често се използва по-удобната еквивалентна формула:
+\[ \mathbb{D}X = \mathbb{E}X^2 - (\mathbb{E}X)^2, \quad \text{където } \mathbb{E}X^2 = \sum_{i} x_i^2 p_i \]
+
+\section{Пораждащи функции и техни свойства}
+
+При аналитичното изследване на дискретни случайни величини, приемащи цели неотрицателни стойности ($X \in \{0, 1, 2, \dots\}$), мощен инструмент се явява вероятностната пораждаща функция.
+
+\begin{definition}
+\textbf{Пораждаща функция} на дискретна случайна величина $X$ се нарича функцията на комплексния или реалния аргумент $s$, дефинирана като математическото очакване на $s^X$:
+\[ \varphi_X(s) = \mathbb{E}[s^X] = \sum_{k=0}^{\infty} p_k s^k, \quad \text{където } p_k = \mathbb{P}(X = k) \]
+\end{definition}
+
+\subsection{Основни свойства на пораждащите функции}
+\begin{enumerate}
+    \item \textbf{Сходимост}: Тъй като $\sum_{k=0}^{\infty} p_k = 1$, редът, дефиниращ $\varphi_X(s)$, е абсолютно сходящ в затворения кръг $|s| \le 1$.
+    \item \textbf{Стойност в единицата}: $\varphi_X(1) = \sum_{k=0}^{\infty} p_k = 1$.
+    \item \textbf{Връзка с моментите (намиране на математическо очакване)}: Първата производна на пораждащата функция в точката $s=1$ дава математическото очакване на случайната величина:
+    \[ \varphi_X'(1) = \left. \sum_{k=1}^{\infty} k p_k s^{k-1} \right|_{s=1} = \sum_{k=1}^{\infty} k p_k = \mathbb{E}X \]
+    \item \textbf{Връзка с моментите (намиране на дисперсия)}: Втората производна в точката $s=1$ дава втория факториален момент:
+    \[ \varphi_X''(1) = \left. \sum_{k=2}^{\infty} k(k-1) p_k s^{k-2} \right|_{s=1} = \mathbb{E}[X(X-1)] = \mathbb{E}X^2 - \mathbb{E}X \]
+    Следователно дисперсията може да се изрази чрез производните в точката 1:
+    \[ \mathbb{D}X = \varphi_X''(1) + \varphi_X'(1) - (\varphi_X'(1))^2 \]
+    \item \textbf{Пораждаща функция на сума от независими случайни величини}: Ако $X$ и $Y$ са независими случайни величини, то пораждащата функция на тяхната сума е произведение от техните пораждащи функции:
+    \[ \varphi_{X+Y}(s) = \varphi_X(s) \cdot \varphi_Y(s) \]
+\end{enumerate}
+
+\section{Анализ на основните дискретни разпределения}
+
+\subsection{Дискретно равномерно разпределение}
+\subsubsection{Дефиниция и пример за възникване}
+Една случайна величина $X$ има дискретно равномерно разпределение над крайния интервал от цели числа $\{1, 2, \dots, n\}$, ако приема всяка една от тези стойности с еднаква вероятност.
+\[ \mathbb{P}(X = k) = \frac{1}{n}, \quad \text{за } k = 1, 2, \dots, n \]
+\textbf{Пример за възникване}: Хвърляне на стандартен симетричен куб за игра с шест страни. Случайната величина $X$, съпоставяща броя на падналите точки, има равномерно разпределение с $n=6$ и вероятност $p_k = 1/6$ за всяка страна.
+
+\subsubsection{Пресмятане на моментите}
+За изчисляването на математическото очакване използваме формулата за сума на първите $n$ естествени числа ($\sum_{k=1}^n k = \frac{n(n+1)}{2}$):
+\[ \mathbb{E}X = \sum_{k=1}^{n} k \cdot \frac{1}{n} = \frac{1}{n} \sum_{k=1}^{n} k = \frac{1}{n} \cdot \frac{n(n+1)}{2} = \frac{n+1}{2} \]
+
+За дисперсията първо пресмятаме втория момент, използвайки сумата от квадратите на първите $n$ числа ($\sum_{k=1}^n k^2 = \frac{n(n+1)(2n+1)}{6}$):
+\[ \mathbb{E}X^2 = \sum_{k=1}^{n} k^2 \cdot \frac{1}{n} = \frac{1}{n} \cdot \frac{n(n+1)(2n+1)}{6} = \frac{(n+1)(2n+1)}{6} \]
+Сега прилагаме формулата за дисперсия:
+\[ \mathbb{D}X = \mathbb{E}X^2 - (\mathbb{E}X)^2 = \frac{(n+1)(2n+1)}{6} - \left(\frac{n+1}{2}\right)^2 = \frac{n+1}{2} \left[ \frac{2n+1}{3} - \frac{n+1}{2} \right] \]
+\[ \mathbb{D}X = \frac{n+1}{2} \cdot \frac{4n + 2 - 3n - 3}{6} = \frac{(n+1)(n-1)}{12} = \frac{n^2 - 1}{12} \]
+
+\subsection{Биномно разпределение}
+\subsubsection{Дефиниция и пример за възникване}
+Нека разгледаме схема на Бернули – поредица от $n$ независими опити, при всеки от които дадено събитие (успех) настъпва с постоянна вероятност $p$, а обратното събитие (неуспех) – с вероятност $q = 1-p$. Случайната величина $X$, представляваща общия брой на успехите в тези $n$ опита, има биномно разпределение $X \sim Bi(n, p)$.
+\[ \mathbb{P}(X = k) = \binom{n}{k} p^k q^{n-k}, \quad k = 0, 1, \dots, n \]
+Условието за нормировка е изпълнено според формулата за бинома на Нютон: $\sum_{k=0}^n \binom{n}{k} p^k q^{n-k} = (p+q)^n = 1^n = 1$.
+
+\textbf{Пример за възникване}: Тестване на партида от 100 детайла, произведени на автоматична линия, където вероятността за дефект на всеки детайл е независима и е равна на $0.05$. Случайната величина $X$ – брой дефектни детайли, е биномно разпределена с параметри $n=100, p=0.05$.
+
+\subsubsection{Пресмятане на моментите чрез пораждаща функция}
+Намираме пораждащата функция на биномното разпределение:
+\[ \varphi_X(s) = \sum_{k=0}^{n} \binom{n}{k} p^k q^{n-k} s^k = \sum_{k=0}^{n} \binom{n}{k} (ps)^k q^{n-k} = (ps + q)^n \]
+Намираме първата и втората производна по аргумента $s$:
+\[ \varphi_X'(s) = n(ps + q)^{n-1} \cdot p \]
+\[ \varphi_X''(s) = n(n-1)(ps + q)^{n-2} \cdot p^2 \]
+Заместваме $s=1$ (като вземем предвид, че $p \cdot 1 + q = p + q = 1$):
+\[ \mathbb{E}X = \varphi_X'(1) = n(1)^{n-1} \cdot p = np \]
+\[ \varphi_X''(1) = n(n-1)(1)^{n-2} p^2 = n(n-1)p^2 \]
+Изчисляваме дисперсията $\mathbb{D}X$:
+\[ \mathbb{D}X = \varphi_X''(1) + \varphi_X'(1) - (\varphi_X'(1))^2 = n(n-1)p^2 + np - (np)^2 \]
+\[ \mathbb{D}X = n^2p^2 - np^2 + np - n^2p^2 = np(1-p) = npq \]
+
+\subsection{Геометрично разпределение}
+\subsubsection{Дефиниция и пример за възникване}
+Нека отново провеждаме независими опити от схемата на Бернули с вероятност за успех $p$ и неуспех $q = 1-p$. Провеждането на опитите продължава до настъпването на първия успех. Случайната величина $X$, дефинираща броя на опитите (неуспехите) \textit{преди} първия успех, приема стойности $k \in \{0, 1, 2, \dots\}$ и се нарича геометрично разпределена:
+\[ \mathbb{P}(X = k) = q^k p, \quad k = 0, 1, 2, \dots \]
+\textit{Забележка}: В някои източници геометричното разпределение се дефинира като общия брой на опитите \textit{включително} успешния ($X' = X + 1 \in \{1, 2, \dots\}$). Тук ще разгледаме стандартния случай за брой неуспехи до първия успех.
+
+\textbf{Пример за възникване (Задача за баскетболиста)}: Баскетболист стреля към коша от линията за три точки, като вероятността му за точен изстрел при всеки независим опит е $p$. Намерете разпределението на броя на пропуските, които той прави преди първото си попадение. Това разпределение е геометрично.
+
+\subsubsection{Пресмятане на моментите чрез пораждаща функция}
+Намираме пораждащата функция, като използваме формулата за сума на безкрайна геометрична прогресия ($\sum_{k=0}^{\infty} x^k = \frac{1}{1-x}$ за $|x| < 1$):
+\[ \varphi_X(s) = \sum_{k=0}^{\infty} (q^k p) s^k = p \sum_{k=0}^{\infty} (qs)^k = \frac{p}{1 - qs}, \quad \text{при } |qs| < 1 \]
+Намираме производните на функцията по правилата за диференциране:
+\[ \varphi_X'(s) = \left. p \cdot (-1)(1 - qs)^{-2} \cdot (-q) \right. = \frac{pq}{(1 - qs)^2} \]
+\[ \varphi_X''(s) = pq \cdot (-2)(1 - qs)^{-3} \cdot (-q) = \frac{2pq^2}{(1 - qs)^3} \]
+Заместваме стойността на аргумента $s=1$:
+\[ \mathbb{E}X = \varphi_X'(1) = \frac{pq}{(1 - q)^2} = \frac{pq}{p^2} = \frac{q}{p} \]
+\[ \varphi_X''(1) = \frac{2pq^2}{(1 - q)^3} = \frac{2pq^2}{p^3} = \frac{2q^2}{p^2} \]
+Изчисляваме дисперсията на случайната величина:
+\[ \mathbb{D}X = \varphi_X''(1) + \varphi_X'(1) - (\varphi_X'(1))^2 = \frac{2q^2}{p^2} + \frac{q}{p} - \left(\frac{q}{p}\right)^2 \]
+\[ \mathbb{D}X = \frac{2q^2 + pq - q^2}{p^2} = \frac{q^2 + pq}{p^2} = \frac{q(q + p)}{p^2} = \frac{q}{p^2} \]
+
+\subsection{Поасоново разпределение}
+\subsubsection{Дефиниция и пример за възникване}
+Поасоновото разпределение е граничен случай на биномното разпределение при много голям брой опити ($n \to \infty$) и изключително ниска вероятност за успех ($p \to 0$), така че произведението им да остава постоянна величина ($np = \lambda > 0$). Параметърът $\lambda$ има смисъл на средна интензивност на настъпване на събитието. Случайната величина $X \sim Po(\lambda)$ приема стойности $k \in \{0, 1, 2, \dots\}$ с вероятности:
+\[ \mathbb{P}(X = k) = \frac{\lambda^k e^{-\lambda}}{k!}, \quad k = 0, 1, 2, \dots \]
+Условието за нормировка е в сила поради разлагането на експоненциалната функция в ред на Маклорен: $\sum_{k=0}^{\infty} \frac{\lambda^k e^{-\lambda}}{k!} = e^{-\lambda} \sum_{k=0}^{\infty} \frac{\lambda^k}{k!} = e^{-\lambda} \cdot e^{\lambda} = 1$.
+
+\textbf{Пример за възникване}: Моделиране на броя на телефонните повиквания или интернет заявките, пристигащи към сървър на мобилен оператор в рамките на фиксиран времеви интервал (например за една минута), при условие че те възникват независимо едни от други и потокът им е хомогенен.
+
+\subsubsection{Пресмятане на моментите чрез пораждаща функция}
+Намираме пораждащата функция на Поасоновото разпределение:
+\[ \varphi_X(s) = \sum_{k=0}^{\infty} \frac{\lambda^k e^{-\lambda}}{k!} s^k = e^{-\lambda} \sum_{k=0}^{\infty} \frac{(\lambda s)^k}{k!} = e^{-\lambda} \cdot e^{\lambda s} = e^{\lambda(s - 1)} \]
+Диференцираме последователно по $s$:
+\[ \varphi_X'(s) = e^{\lambda(s - 1)} \cdot \lambda \]
+\[ \varphi_X''(s) = \lambda \cdot e^{\lambda(s - 1)} \cdot \lambda = \lambda^2 e^{\lambda(s - 1)} \]
+Заместваме $s=1$:
+\[ \mathbb{E}X = \varphi_X'(1) = \lambda \cdot e^0 = \lambda \]
+\[ \varphi_X''(1) = \lambda^2 \cdot e^0 = \lambda^2 \]
+Изчисляваме дисперсията $\mathbb{D}X$:
+\[ \mathbb{D}X = \varphi_X''(1) + \varphi_X'(1) - (\varphi_X'(1))^2 = \lambda^2 + \lambda - \lambda^2 = \lambda \]
+\textbf{Забележително свойство}: При Поасоновото разпределение математическото очакване и дисперсията са равни на параметъра на интензивност $\lambda$.
+
+\end{FlushLeft}
+
+\end{document}
