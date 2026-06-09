@@ -51,7 +51,7 @@
 \newtheorem{remark}{Забележка}
 
 \title{Бази от данни - нормални форми}
-\author{Ивайло Андреев + chat gpt 5.5, DeepSeek-V3, gemini 3 Flash}
+\author{Ивайло Андреев \\+ chat gpt 5.5, DeepSeek-V3, gemini 3 Flash, Claude Sonnet 4.6}
 \date{9 май 2026}
 
 \begin{document}
@@ -87,17 +87,7 @@
 
 Ако в таблица Students student\_id е уникален ключ, то $\{\text{student\_id}\} \rightarrow \{\text{name}\}$ е ФЗ, защото стойността на student\_id еднозначно определя записа за конкретен студент.
 
-\subsection{Правила за манипулация на ФЗ}
 
-Следните правила следват от аксиомите на Армстронг:
-
-\textbf{\textit{Правило за разделяне}} --- ако $X \rightarrow YZ$, то $X \rightarrow Y$ и $X \rightarrow Z$
-
-$$X \rightarrow Y, Z \iff X \rightarrow Y \text{ и } X \rightarrow Z$$
-
-\textbf{\textit{Правило за комбиниране}} --- ако $X \rightarrow Y$ и $X \rightarrow Z$, то $X \rightarrow YZ$
-
-$$X \rightarrow Y \text{ и } X \rightarrow Z \iff X \rightarrow Y, Z$$
 
 \begin{definition}
 \textbf{\textit{Тривиална ФЗ}} е $X \rightarrow Y$, където $Y \subseteq X$.
@@ -108,20 +98,18 @@ $$X \rightarrow Y \text{ и } X \rightarrow Z \iff X \rightarrow Y, Z$$
 \section{Ключове}
 
 \begin{definition}
-Множество от атрибути $K$ е \textbf{\textit{кандидат-ключ}} на релация $R$, ако:
-\begin{enumerate}
-    \item $K \rightarrow \text{(всички атрибути на R)}$ --- $K$ функционално определя всички останали атрибути
-    \item $K$ е минимално --- няма строго подмножество на $K$ със същото свойство
-\end{enumerate}
+\textbf{\textit{Суперключ}} е множество от атрибути, което функционално определя всички останали атрибути на релацията (не е задължително минимално).
 \end{definition}
 
 \begin{definition}
-\textbf{\textit{Суперключ}} е множество от атрибути, което функционално определя всички останали, но не е задължително минимално.
+\textbf{\textit{Кандидат-ключ (КК)}} е минимален суперключ. Една релация може да има повече от един кандидат-ключ.
 \end{definition}
 
 \begin{definition}
-При дадена релация могат да съществуват няколко \textbf{\textit{кандидат-ключове}}, а един от тях се избира като \textbf{\textit{първичен ключ}}.
+\textbf{\textit{Първичен ключ (ПК)}} е избран кандидат-ключ, използван за идентификация на кортежите. Стойностите му не могат да бъдат \texttt{NULL}.
+\end{definition}
 
+\begin{definition}
 \textbf{\textit{Първични атрибути (prime attributes)}} са атрибути, които принадлежат на поне един кандидат-ключ.
 
 \textbf{\textit{Непървични атрибути (non-prime attributes)}} са атрибути, които не принадлежат на нито един кандидат-ключ.
@@ -193,9 +181,17 @@ $$X \rightarrow Y \text{ и } X \rightarrow Z \iff X \rightarrow Y, Z$$
 
 \subsection{Пример}
 
-Дадени: $A \rightarrow B$ и $BC \rightarrow D$.
+Дадена е схема Student(student\_id, name, dept\_id, dept\_name, advisor\_id) с ФЗ:
+\begin{itemize}
+    \item $\text{student\_id} \rightarrow \text{name}, \text{dept\_id}, \text{advisor\_id}$
+    \item $\text{dept\_id} \rightarrow \text{dept\_name}$
+\end{itemize}
 
-По псевдотранзитивност получаваме: $AC \rightarrow D$.
+По \textbf{транзитивност}: $\text{student\_id} \rightarrow \text{dept\_id}$ и $\text{dept\_id} \rightarrow \text{dept\_name}$, следователно $\text{student\_id} \rightarrow \text{dept\_name}$.
+
+По \textbf{разлагане}: от $\text{student\_id} \rightarrow \text{name}, \text{dept\_id}, \text{advisor\_id}$ следват отделно $\text{student\_id} \rightarrow \text{name}$, $\text{student\_id} \rightarrow \text{dept\_id}$, $\text{student\_id} \rightarrow \text{advisor\_id}$.
+
+По \textbf{комбинация}: обратно, трите отделни зависимости се комбинират обратно в $\text{student\_id} \rightarrow \text{name}, \text{dept\_id}, \text{advisor\_id}$.
 
 \section{Ограничения и цялостност}
 
@@ -218,13 +214,21 @@ $$X \rightarrow Y \text{ и } X \rightarrow Z \iff X \rightarrow Y, Z$$
 \subsection{Типове аномалии}
 
 \begin{itemize}
-    \item \textbf{Излишества} --- Повторение на информация. Пример: Ако таблица съхранява информация за служителя и неговия отдел, информацията за отдела се повтаря за всеки служител в него.
-    
+    \item \textbf{Излишества} --- Повторение на информация.
+
+    \textit{Пример:} Ако таблица съхранява информация за служителя и неговия отдел, информацията за отдела се повтаря за всеки служител в него.
+
     \item \textbf{Аномалии при обновяване} --- При промяна на данни в един кортеж, свързаната информация не се обновява, водещо до неконсистентност.
-    
-    \item \textbf{Аномалии при добавяне} --- Невъзможност да добавим определена информация, без да добавим и друга. Пример: Не можем да добавим нов отдел, ако информацията за отдела се пази само заедно със служители.
-    
-    \item \textbf{Аномалии при изтриване} --- Изтриването на данни води до загуба на друга важна информация. Пример: Изтриването на последния служител от даден отдел може да доведе и до загуба на информацията за самия отдел, ако тя се пази в същата таблица.
+
+    \textit{Пример:} Таблица Employee(emp\_id, name, dept\_id, dept\_name) без декомпозиция. Отдел 10 се казва „Маркетинг“. Ако преименуваме отдела на „Дигитален маркетинг“, трябва да обновим колоната dept\_name за \emph{всеки} служител в отдел 10. Ако пропуснем дори един ред, базата данни е в неконсистентно състояние --- различни редове твърдят различни имена за един и същ отдел.
+
+    \item \textbf{Аномалии при добавяне} --- Невъзможност да добавим определена информация, без да добавим и друга.
+
+    \textit{Пример:} Не можем да добавим нов отдел, ако информацията за отдела се пази само заедно със служители.
+
+    \item \textbf{Аномалии при изтриване} --- Изтриването на данни води до загуба на друга важна информация.
+
+    \textit{Пример:} Изтриването на последния служител от даден отдел може да доведе и до загуба на информацията за самия отдел, ако тя се пази в същата таблица.
 \end{itemize}
 
 \subsection{Декомпозиция за избягване на излишествата}
@@ -250,6 +254,10 @@ $$X \rightarrow Y \text{ и } X \rightarrow Z \iff X \rightarrow Y, Z$$
 \end{definition}
 
 В класическия релационен модел на Код всички релации се приемат за в 1НФ. Това е фундаментално свойство на модела.
+
+\textit{Пример на нарушение:} Таблица Student(student\_id, name, phone\_numbers), където phone\_numbers съдържа стойности от вида \texttt{"0888111222, 0899333444"} --- списък от телефони в един атрибут. Това нарушава 1НФ, защото стойността не е атомарна. Решението е или да се добави отделна таблица StudentPhone(student\_id, phone), или да се добавят отделни колони phone1, phone2 (ако броят е фиксиран).
+
+Друг пример: атрибут address, съдържащ \texttt{"ул. Витоша 15, София 1000"} --- ако приложението трябва да търси по град, адресът трябва да се раздели на отделни атомарни колони (street, city, zip).
 
 \subsection{Втора нормална форма (2НФ)}
 
@@ -299,11 +307,20 @@ $$X \rightarrow Y \text{ и } X \rightarrow Z \iff X \rightarrow Y, Z$$
 
 НФБК е по-строга от 3НФ. Всяка релация в НФБК е и в 3НФ, но не е вярно обратното.
 
+\textit{Класически пример на 3НФ, но не НФБК:} Таблица CourseTeacher(student, course, teacher), където:
+\begin{itemize}
+    \item Всеки студент записва курс при точно един преподавател: $\{\text{student}, \text{course}\} \rightarrow \text{teacher}$
+    \item Всеки преподавател води само един курс: $\text{teacher} \rightarrow \text{course}$
+\end{itemize}
+Кандидат-ключовете са $\{\text{student}, \text{course}\}$ и $\{\text{student}, \text{teacher}\}$. Атрибутът course е \emph{prime} (участва в КК), затова ФЗ $\text{teacher} \rightarrow \text{course}$ не нарушава 3НФ. Но нарушава НФБК, защото teacher не е суперключ.
+
+Това е илюстрация на факта, че \textbf{разликата между 3НФ и НФБК се проявява само при наличие на припокриващи се кандидат-ключове} --- ситуация, която на практика е сравнително рядка.
+
 \begin{remark}
 НФБК адресира аномалии, породени от функционални зависимости, но не покрива проблемите, свързани с многозначни зависимости. За тях е необходима 4НФ.
 \end{remark}
 
-\section{Алгоритъм за разложение на релация в НФБК}
+\section{Алгоритъм за разложение на релация в НФБК [Опционално]}
 
 Входни данни: Релация $R_0$ с множество от ФЗ $S_0$.
 
@@ -323,7 +340,7 @@ $$X \rightarrow Y \text{ и } X \rightarrow Z \iff X \rightarrow Y, Z$$
     \item Връщаме унията на получените релации
 \end{enumerate}
 
-\subsection{Пример}
+\subsection{Пример [Опционално]}
 
 Дадена релация: $R(A, B, C, D)$ с ФЗ: $AB \rightarrow C$, $C \rightarrow D$, $D \rightarrow A$.
 
@@ -331,21 +348,23 @@ $$X \rightarrow Y \text{ и } X \rightarrow Z \iff X \rightarrow Y, Z$$
 
 ФЗ $C \rightarrow D$ нарушава НФБК (защото $C$ не е суперключ).
 
-$C^+ = \{C, D, A\}$
+$C^+ = \{A, C, D\}$
+
+$R_1 = C^+ = \{A, C, D\}$, $\quad R_2 = (R \setminus C^+) \cup \{C\} = (\{A,B,C,D\} \setminus \{A,C,D\}) \cup \{C\} = \{B, C\}$
 
 Разложение:
 \begin{itemize}
-    \item $R_1(C, D, A)$ с ФЗ: $C \rightarrow D$, $D \rightarrow A$
-    \item $R_2(B, C)$ с ФЗ: (нито една нетривиална)
+    \item $R_1(A, C, D)$ --- проекция на ФЗ: $C \rightarrow D$, $D \rightarrow A$
+    \item $R_2(B, C)$ --- нито една нетривиална ФЗ
 \end{itemize}
 
-За $R_1(C, D, A)$: ФЗ $D \rightarrow A$ нарушава НФБК.
+В $R_1(A, C, D)$ кандидат-ключ е само $\{C\}$. ФЗ $D \rightarrow A$ нарушава НФБК (защото $D$ не е суперключ в $R_1$).
 
-$D^+ = \{D, A\}$
+$D^+ = \{A, D\}$
 
 Разложение:
 \begin{itemize}
-    \item $R_{1a}(D, A)$
+    \item $R_{1a}(A, D)$
     \item $R_{1b}(C, D)$
 \end{itemize}
 
