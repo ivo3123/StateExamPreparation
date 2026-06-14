@@ -1,0 +1,1 @@
+Виж разписаната тема на Георги Терзиев тук: https://github.com/Justsvetoslavov/FMI-State-Exam-Prep/tree/master/03-Theory/SDA-Topic15
