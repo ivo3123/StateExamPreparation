@@ -1,12 +1,12 @@
 \documentclass{scrartcl}
-\usepackage{graphicx}  % required for inserting images
+\usepackage{graphicx}
 
-% for cyrillic and Bulgarian language
+% За кирилица и български език
 \usepackage[utf8]{inputenc}
 \usepackage[T2A]{fontenc}
 \usepackage[bulgarian]{babel}
 
-% math packages
+% Математически пакети
 \usepackage{amsmath}
 \usepackage{float}
 \usepackage{amsfonts}
@@ -14,7 +14,7 @@
 \usepackage{amsthm}
 \usepackage{cancel}
 
-\usepackage{ragged2e}  % adds FlushLeft
+\usepackage{ragged2e}
 
 \usepackage{listings}
 \usepackage{xcolor}
@@ -52,14 +52,13 @@
 
 \newtheorem{theorem}{Теорема}
 \newtheorem{definition}{Дефиниция}
-
 \newtheorem{lemma}{Лема}
 \newtheorem{corollary}{Следствие}
 \newtheorem{remark}{Забележка}
 
 \title{ДИС - Определен интеграл}
-\author{Ивайло Андреев + gemini 3 Flash, Claude Sonnet 4.6}
-\date{16 май 2026}
+\author{Ивайло Андреев}
+\date{19 юни 2026}
 
 \begin{document}
 \maketitle
@@ -72,26 +71,24 @@
 
 \section{Разбиване на интервал и суми на Дарбу}
 
-Въвеждането на понятието определен (Риманов) интеграл започва геометрично с идеята за пресмятане на лице на криволинеен трапец чрез апроксимация с правоъгълници. За целта дефинираме структура върху затворения интервал.
-
 \begin{definition}[Разбиване на интервал]
-Нека $[a, b]$ е краен и затворен интервал в $\mathbb{R}$ ($a < b$). Множеството от точки $\tau = \{x_0, x_1, x_2, \dots, x_n\}$, такива че:
+Нека $[a, b]$ е краен и затворен интервал. Множеството от делящи точки $\tau = \{x_0, x_1, x_2, \dots, x_n\}$, такива че:
 \[ a = x_0 < x_1 < x_2 < \dots < x_{n-1} < x_n = b \]
 се нарича \textbf{разбиване} на интервала $[a, b]$. 
 
-Интервалите $[x_{i-1}, x_i]$ за $i = 1, 2, \dots, n$ се наричат \textbf{частични интервали} на разбиването $\tau$, а техните дължини означаваме с $\Delta x_i = x_i - x_{i-1}$.
+Интервалите $[x_{i-1}, x_i]$ за $i = 1, 2, \dots, n$, определени от делящите точки, се наричат \textbf{интервали на разбиването} $\tau$, а техните дължини означаваме с $\Delta x_i = x_i - x_{i-1}$.
 \end{definition}
 
 \begin{definition}[Диаметър на разбиване]
-Числото $\delta(\tau)$, дефинирано като най-голямата от дължините на частичните интервали, се нарича \textbf{диаметър (стъпка)} на разбиването $\tau$:
+Числото $\delta(\tau)$, дефинирано като най-голямата от дължините на интервали за разбиването, се нарича \textbf{диаметър} на разбиването $\tau$:
 \[ \delta(\tau) = \max_{1 \le i \le n} \Delta x_i \]
 \end{definition}
 
-Нека $f: [a, b] \to \mathbb{R}$ е \textbf{ограничена функция} в интервала $[a, b]$. Тъй като е ограничена в целия интервал, тя е ограничена и във всеки частичен интервал $[x_{i-1}, x_i]$. Следователно съществуват точните долна и горна граници:
+Нека $f: [a, b] \to \mathbb{R}$ е \textbf{ограничена функция} в интервала $[a, b]$. Тъй като е ограничена в целия интервал, тя е ограничена и във всеки отделен интервал на разбиването $[x_{i-1}, x_i]$. Следователно съществуват точните долна и горна граници:
 \[ m_i = \inf_{x \in [x_{i-1}, x_i]} f(x), \quad M_i = \sup_{x \in [x_{i-1}, x_i]} f(x) \]
 
 \begin{definition}[Суми на Дарбу]
-За дадено разбиване $\tau$ на интервала $[a, b]$ и ограничена функция $f(x)$ дефинираме:
+За дадено разбиване $\tau$ на интервала $[a, b]$ и ограничена функция $f: [a, b] \to \mathbb{R}$ дефинираме:
 \begin{enumerate}
     \item \textbf{Малка сума на Дарбу} $s(f, \tau)$ (сбор от лицата на вписаните правоъгълници):
     \[ s(f, \tau) = \sum_{i=1}^{n} m_i \Delta x_i \]
@@ -101,16 +98,12 @@
 Понеже $m_i \le M_i$ за всяко $i$, очевидно е изпълнено неравенството $s(f, \tau) \le S(f, \tau)$.
 \end{definition}
 
-Геометричният смисъл на двете суми е показан по-долу:
+Геометричният смисъл на двете суми на Дарбу е показан по-долу:
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[scale=0.9]
-  % f(x) = 2.5 - 0.5*(x-2)^2 on [0,4], partition tau = {0,1,2,3,4}
-  % m_i (min on subinterval): 0.5, 2.0, 2.0, 0.5
-  % M_i (max on subinterval): 2.0, 2.5, 2.5, 2.0
-
-  % ---- Ляво: малка сума (вписани правоъгълници) ----
+  % ---- Ляво: малка сума ----
   \begin{scope}[xshift=0cm]
     \fill[blue!20] (0,0) rectangle (1,0.5);
     \fill[blue!20] (1,0) rectangle (2,2.0);
@@ -120,9 +113,7 @@
     \draw[blue!70, thick] (1,0) rectangle (2,2.0);
     \draw[blue!70, thick] (2,0) rectangle (3,2.0);
     \draw[blue!70, thick] (3,0) rectangle (4,0.5);
-    % curve on top
-    \draw[black, very thick] plot[domain=0:4, samples=80]
-      (\x, {2.5 - 0.5*(\x-2)*(\x-2)});
+    \draw[black, very thick] plot[domain=0:4, samples=80] (\x, {2.5 - 0.5*(\x-2)*(\x-2)});
     \draw[-{Stealth}] (-0.3,0) -- (4.7,0) node[right] {$x$};
     \draw[-{Stealth}] (0,-0.3) -- (0,3.0) node[above] {$y$};
     \foreach \xv in {0,1,2,3,4}
@@ -132,11 +123,10 @@
     \node[below, font=\scriptsize] at (2, -0.05) {$x_2$};
     \node[below, font=\scriptsize] at (3, -0.05) {$x_3$};
     \node[below, font=\scriptsize] at (4, -0.05) {$x_4$};
-    \node[below, align=center, font=\small] at (2,-0.8)
-      {Малка сума $s(f,\tau)$ ---\\вписани правоъгълници};
+    \node[below, align=center, font=\small] at (2,-0.8) {Малка сума $s(f,\tau)$ ---\\вписани правоъгълници};
   \end{scope}
 
-  % ---- Дясно: голяма сума (описани правоъгълници) ----
+  % ---- Дясно: голяма сума ----
   \begin{scope}[xshift=5.5cm]
     \fill[red!20] (0,0) rectangle (1,2.0);
     \fill[red!20] (1,0) rectangle (2,2.5);
@@ -146,9 +136,7 @@
     \draw[red!70, thick] (1,0) rectangle (2,2.5);
     \draw[red!70, thick] (2,0) rectangle (3,2.5);
     \draw[red!70, thick] (3,0) rectangle (4,2.0);
-    % curve on top
-    \draw[black, very thick] plot[domain=0:4, samples=80]
-      (\x, {2.5 - 0.5*(\x-2)*(\x-2)});
+    \draw[black, very thick] plot[domain=0:4, samples=80] (\x, {2.5 - 0.5*(\x-2)*(\x-2)});
     \draw[-{Stealth}] (-0.3,0) -- (4.7,0) node[right] {$x$};
     \draw[-{Stealth}] (0,-0.3) -- (0,3.0) node[above] {$y$};
     \foreach \xv in {0,1,2,3,4}
@@ -158,146 +146,152 @@
     \node[below, font=\scriptsize] at (2, -0.05) {$x_2$};
     \node[below, font=\scriptsize] at (3, -0.05) {$x_3$};
     \node[below, font=\scriptsize] at (4, -0.05) {$x_4$};
-    \node[below, align=center, font=\small] at (2,-0.8)
-      {Голяма сума $S(f,\tau)$ ---\\описани правоъгълници};
+    \node[below, align=center, font=\small] at (2,-0.8) {Голяма сума $S(f,\tau)$ ---\\описани правоъгълници};
   \end{scope}
 \end{tikzpicture}
-\caption{Суми на Дарбу за разбиване $\tau = \{x_0, x_1, x_2, x_3, x_4\}$. Вляво: вписани правоъгълници с височини $m_i = \inf_{[x_{i-1},x_i]} f$ образуват малката сума $s(f,\tau)$. Вдясно: описани правоъгълници с височини $M_i = \sup_{[x_{i-1},x_i]} f$ образуват голямата сума $S(f,\tau)$.}
+\caption{Суми на Дарбу за разбиване $\tau=\{x_0,x_1,x_2,x_3,x_4\}$}
 \end{figure}
 
-\subsection{Поведение на сумите на Дарбу при добавяне на нови точки}
+\subsection{Поведение на сумите на Дарбу при добавяне на нови делящи точки}
 
-Казваме, че разбиването $\tau'$ е \textbf{наслагване (разширение)} на разбиването $\tau$ (означава се $\tau \subset \tau'$), ако $\tau'$ съдържа всички точки на $\tau$ и поне още една нова точка.
+Казваме, че разбиването $\tau^{\prime}$ е по-фино разбиване на разбиването $\tau$ (означава се $\tau \subset \tau^{\prime}$), ако $\tau^{\prime}$ съдържа всички делящи точки на $\tau$ и поне още една нова деляща точка.
 
-\begin{theorem}[Теорема за монотонност на Дарбу сумите]\label{thm:monotone}
-При добавяне на нови точки в разбиването на интервала, големите суми на Дарбу не нарастват, а малките не намаляват. Тоест, ако $\tau \subset \tau'$, то:
-\[ s(f, \tau) \le s(f, \tau') \quad \text{и} \quad S(f, \tau') \le S(f, \tau) \]
+\begin{theorem}\label{monotonnicity_darbu}[Теорема за монотонност на сумите на Дарбу]
+При добавяне на нови делящи точки в разбиването на интервала, големите суми на Дарбу не нарастват, а малките не намаляват. Тоест, ако $\tau \subset \tau^{\prime}$, то:
+\[ s(f, \tau) \le s(f, \tau^{\prime}) \quad \text{и} \quad S(f, \tau^{\prime}) \le S(f, \tau) \]
 \end{theorem}
-
-Геометричният смисъл на теоремата е показан по-долу:
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[scale=0.9]
-  % f(x) = 2 - 0.4x on [0,4], new point y=2
-  % m_k=0.4 (on [0,4]),  m_k'=1.2 (on [0,2]),  m_k''=0.4 (on [2,4])
-  % M_k=2.0 (on [0,4]),  M_k'=2.0 (on [0,2]),  M_k''=1.2 (on [2,4])
-
-  % ---- Ляво: ефект върху малката сума ----
+  % Ляво
   \begin{scope}[xshift=0cm]
-    \fill[blue!20] (0,0) rectangle (2,1.2);
-    \fill[blue!20] (2,0) rectangle (4,0.4);
-    \draw[black!55, dashed, thick] (0,0) rectangle (4,0.4);
-    \draw[blue!70, thick] (0,0) rectangle (2,1.2);
-    \draw[blue!70, thick] (2,0) rectangle (4,0.4);
-    \draw[black, very thick] plot[domain=0:4, samples=50]
-      (\x, {2 - 0.4*\x});
-    \draw[-{Stealth}] (-0.3,0) -- (4.6,0) node[right] {$x$};
-    \draw[-{Stealth}] (0,-0.3) -- (0,2.6) node[above] {$y$};
-    \foreach \xv in {0,2,4}
-      \draw (\xv,1.5pt) -- (\xv,-1.5pt);
-    \node[below, font=\scriptsize] at (0,-0.05) {$x_{k-1}$};
-    \node[below, font=\scriptsize] at (2,-0.05) {$y$};
-    \node[below, font=\scriptsize] at (4,-0.05) {$x_k$};
-    \draw (1.5pt,0.4) -- (-1.5pt,0.4);
-    \draw (1.5pt,1.2) -- (-1.5pt,1.2);
-    \node[left, font=\scriptsize] at (0,0.4) {$m_k$};
-    \node[left, font=\scriptsize] at (0,1.2) {$m_k'$};
-    \node[below, align=center, font=\small] at (2,-0.7)
-      {Малка сума: $m_k',\,m_k'' \ge m_k$\\$\Rightarrow s(f,\tau') \ge s(f,\tau)$};
+    \fill[blue!15] (0,0) rectangle (2,1.0);
+    \fill[blue!35] (0,0) rectangle (2,1.8);
+    \fill[blue!35] (2,0) rectangle (4,1.0);
+    \draw[blue!70, thick] (0,0) rectangle (2,1.8);
+    \draw[blue!70, thick] (2,0) rectangle (4,1.0);
+    \draw[dashed] (0,1.0) -- (4,1.0);
+    \draw[black, very thick] (0,2.5) -- (4,0.9);
+    \draw[-{Stealth}] (-0.3,0) -- (4.5,0) node[right] {$x$};
+    \draw[-{Stealth}] (0,-0.3) -- (0,3.0) node[above] {$y$};
+    \node[below] at (0,0) {$x_{k-1}$};
+    \node[below] at (2,0) {$y$};
+    \node[below] at (4,0) {$x_k$};
+    \node[left] at (0,1.0) {$m_k$};
+    \node[left] at (0,1.8) {$m_k'$};
+    \node[below=1cm, align=center] at (2,0) {Малка сума: $m_k', m_k'' \ge m_k$ \\ $\Rightarrow s(f,\tau') \ge s(f,\tau)$};
   \end{scope}
-
-  % ---- Дясно: ефект върху голямата сума ----
-  \begin{scope}[xshift=5.8cm]
-    \fill[red!20] (0,0) rectangle (2,2.0);
-    \fill[red!20] (2,0) rectangle (4,1.2);
-    \draw[black!55, dashed, thick] (0,0) rectangle (4,2.0);
-    \draw[red!70, thick] (0,0) rectangle (2,2.0);
-    \draw[red!70, thick] (2,0) rectangle (4,1.2);
-    \draw[black, very thick] plot[domain=0:4, samples=50]
-      (\x, {2 - 0.4*\x});
-    \draw[-{Stealth}] (-0.3,0) -- (4.6,0) node[right] {$x$};
-    \draw[-{Stealth}] (0,-0.3) -- (0,2.6) node[above] {$y$};
-    \foreach \xv in {0,2,4}
-      \draw (\xv,1.5pt) -- (\xv,-1.5pt);
-    \node[below, font=\scriptsize] at (0,-0.05) {$x_{k-1}$};
-    \node[below, font=\scriptsize] at (2,-0.05) {$y$};
-    \node[below, font=\scriptsize] at (4,-0.05) {$x_k$};
-    \draw (1.5pt,2.0) -- (-1.5pt,2.0);
-    \draw (1.5pt,1.2) -- (-1.5pt,1.2);
-    \node[left, font=\scriptsize] at (0,2.0) {$M_k$};
-    \node[left, font=\scriptsize] at (0,1.2) {$M_k''$};
-    \node[below, align=center, font=\small] at (2,-0.7)
-      {Голяма сума: $M_k',\,M_k'' \le M_k$\\$\Rightarrow S(f,\tau') \le S(f,\tau)$};
+  % Дясно
+  \begin{scope}[xshift=5.5cm]
+    \fill[red!35] (0,0) rectangle (2,2.5);
+    \fill[red!35] (2,0) rectangle (4,1.7);
+    \draw[red!70, thick] (0,0) rectangle (2,2.5);
+    \draw[red!70, thick] (2,0) rectangle (4,1.7);
+    \draw[dashed] (0,2.5) rectangle (4,2.5);
+    \draw[black, very thick] (0,2.5) -- (4,0.9);
+    \draw[-{Stealth}] (-0.3,0) -- (4.5,0) node[right] {$x$};
+    \draw[-{Stealth}] (0,-0.3) -- (0,3.0) node[above] {$y$};
+    \node[below] at (0,0) {$x_{k-1}$};
+    \node[below] at (2,0) {$y$};
+    \node[below] at (4,0) {$x_k$};
+    \node[left] at (0,2.5) {$M_k$};
+    \node[left] at (0,1.7) {$M_k''$};
+    \node[below=1cm, align=center] at (2,0) {Голяма сума: $M_k', M_k'' \le M_k$ \\ $\Rightarrow S(f,\tau') \le S(f,\tau)$};
   \end{scope}
 \end{tikzpicture}
-\caption{Ефект от добавяне на нов възел $y \in (x_{k-1}, x_k)$ при монотонно намаляваща функция $f(x) = 2 - 0{,}4x$.
-Пунктираните правоъгълници показват приноса на $[x_{k-1}, x_k]$ \textbf{преди} добавянето на $y$;
-плътните (сини/червени) --- \textbf{след} разбиването на $[x_{k-1}, y] \cup [y, x_k]$.
-\textbf{Вляво (малка сума):} $m_k' \ge m_k$, затова новите вписани правоъгълници са по-високи и $s(f, \tau') \ge s(f, \tau)$.
-\textbf{Вдясно (голяма сума):} $M_k'' \le M_k$, затова новите описани правоъгълници са по-ниски и $S(f, \tau') \le S(f, \tau)$.}
+\caption{Ефект от добавяне на нова деляща точка $y \in (x_{k-1}, x_k)$}
 \end{figure}
 
 \begin{proof}
-Достатъчно е да докажем твърдението за случая, когато към разбиването $\tau$ се добавя точно \textbf{една нова точка} $y$. Нека тази точка попадне в частичния интервал $[x_{k-1}, x_k]$, т.е. $x_{k-1} < y < x_k$.
+Достатъчно е да докажем твърдението за случая, когато към разбиването $\tau$ се добавя точно една нова деляща точка $y$. Нека тази точка принадлежи на интервала $[x_{k-1}, x_k]$, т.е. $x_{k-1} < y < x_k$. Тогава този интервал се разделя на два подинтервала: $[x_{k-1}, y]$ и $[y, x_k]$. Означаваме точните граници на функцията в тези интервали:
 
-Тогава новият интервал е разделен на два подобласта: $[x_{k-1}, y]$ и $[y, x_k]$. Означаваме точните граници на функцията в тези нови интервали:
-\[ m_k' = \inf_{x \in [x_{k-1}, y]} f(x), \quad m_k'' = \inf_{x \in [y, x_k]} f(x) \]
-\[ M_k' = \sup_{x \in [x_{k-1}, y]} f(x), \quad M_k'' = \sup_{x \in [y, x_k]} f(x) \]
+\[ m_k^{\prime} = \inf_{x \in [x_{k-1}, y]} f(x), \quad M_k^{\prime} = \sup_{x \in [x_{k-1}, y]} f(x) \]
 
-Тъй като множествата $[x_{k-1}, y]$ и $[y, x_k]$ са подмножества на оригиналния интервал $[x_{k-1}, x_k]$, точният инфимум върху по-тясно множество е по-голям или равен на инфимума върху по-широкото множество, а супремумът е по-малък или равен. Следователно:
-\[ m_k \le m_k' \quad \text{и} \quad m_k \le m_k'' \]
-\[ M_k \ge M_k' \quad \text{и} \quad M_k \ge M_k'' \]
+\[ m_k^{\prime\prime} = \inf_{x \in [y, x_k]} f(x), \quad M_k^{\prime\prime} = \sup_{x \in [y, x_k]} f(x) \]
 
-Разглеждаме разликата между новата малка сума $s(f, \tau')$ и старата $s(f, \tau)$. Тъй като всички останали частични интервали извън $k$-тия са идентични, техните членове в сумата се съкращават:
-\[ s(f, \tau') - s(f, \tau) = m_k'(y - x_{k-1}) + m_k''(x_k - y) - m_k(x_k - x_{k-1}) \]
-Заместваме идентичността $(x_k - x_{k-1}) = (y - x_{k-1}) + (x_k - y)$:
-\[ s(f, \tau') - s(f, \tau) = m_k'(y - x_{k-1}) + m_k''(x_k - y) - m_k(y - x_{k-1}) - m_k(x_k - y) \]
-\[ s(f, \tau') - s(f, \tau) = \underbrace{(m_k' - m_k)}_{\ge 0}\underbrace{(y - x_{k-1})}_{> 0} + \underbrace{(m_k'' - m_k)}_{\ge 0}\underbrace{(x_k - y)}_{> 0} \ge 0 \]
-Следователно $s(f, \tau') - s(f, \tau) \ge 0 \Rightarrow s(f, \tau) \le s(f, \tau')$.
+Тъй като интервалите $[x_{k-1}, y]$ и $[y, x_k]$ са подинтервали на интервала $[x_{k-1}, x_k]$, то:
 
-Аналогично разглеждаме разликата за големите суми:
-\[ S(f, \tau) - S(f, \tau') = M_k(x_k - x_{k-1}) - \left[ M_k'(y - x_{k-1}) + M_k''(x_k - y) \right] \]
-\[ S(f, \tau) - S(f, \tau') = \underbrace{(M_k - M_k')}_{\ge 0}\underbrace{(y - x_{k-1})}_{> 0} + \underbrace{(M_k - M_k'')}_{\ge 0}\underbrace{(x_k - y)}_{> 0} \ge 0 \]
-Следователно $S(f, \tau) - S(f, \tau') \ge 0 \Rightarrow S(f, \tau') \le S(f, \tau)$.
+\[ m_k \le m_k^{\prime} \quad \text{и} \quad m_k \le m_k^{\prime\prime} \]
 
-Ако към разбиването се добавят $m$ на брой точки, твърдението се доказва индуктивно чрез прилагане на горната процедура стъпка по стъпка $m$ пъти.
+\[ M_k \ge M_k^{\prime} \quad \text{и} \quad M_k \ge M_k^{\prime\prime} \]
+
+Разглеждаме разликата между новата малка сума $s(f, \tau^{\prime})$ и старата $s(f, \tau)$:
+
+\begin{align*}
+s(f, \tau^{\prime}) - s(f, \tau) & = \cancel{\sum_{i=1}^{k-1}m_i\Delta  x_i} + m_k'(y - x_{k-1}) + m_k'' (x_k - y) + \cancel{\sum_{i=k+1}^{n} m_i\Delta  x_i} \\& - \cancel{\sum_{i=1}^{k-1}m_i\Delta  x_i} - m_k(x_k - x_{k-1}) - \cancel{\sum_{i=k+1}^{n} m_i\Delta  x_i}
+\end{align*}
+
+\[ s(f, \tau^{\prime}) - s(f, \tau) = m_k^{\prime}(y - x_{k-1}) + m_k^{\prime\prime}(x_k - y) - m_k(x_k - x_{k-1}) \]
+
+Заместваме с равенството $(x_k - x_{k-1}) = (y - x_{k-1}) + (x_k - y)$:
+
+\[ s(f, \tau^{\prime}) - s(f, \tau) = (m_k^{\prime} - m_k)(y - x_{k-1}) + (m_k^{\prime\prime} - m_k)(x_k - y) \]
+
+Тъй като $m_k^{\prime} - m_k \ge 0$, $m_k^{\prime\prime} - m_k \ge 0$, $y - x_{k-1} > 0$ и $x_k - y > 0$, следва че:
+
+\[ s(f, \tau^{\prime}) - s(f, \tau) \ge 0 \implies s(f, \tau) \le s(f, \tau^{\prime}) \]
+
+Аналогично за големите суми получаваме:
+
+\[ S(f, \tau) - S(f, \tau^{\prime}) = (M_k - M_k^{\prime})(y - x_{k-1}) + (M_k - M_k^{\prime\prime})(x_k - y) \ge 0 \implies S(f, \tau^{\prime}) \le S(f, \tau) \]
+
+Ако се добавят $m$ на брой делящи точки, твърдението се доказва чрез прилагане на процедурата стъпка по стъпка $m$ пъти.
 \end{proof}
 
-\begin{corollary}\label{cor:any-partitions}
-Ако $\tau_1$ и $\tau_2$ са \textbf{произволни} две разбивания на интервала $[a, b]$, то малката сума на Дарбу за кое да е разбиване не надминава голямата сума за което и да е друго разбиване:
+\begin{corollary}\label{small_sum_is_smaller_than_bigger_sum}
+Малката сума на Дарбу за което и да е разбиване не надминава голямата сума за което и да е друго разбиване.
+
+Тоест ако $\tau_1$ и $\tau_2$ са произволни две разбивания на интервала $[a, b]$, то :
 \[ s(f, \tau_1) \le S(f, \tau_2) \]
 \end{corollary}
-\begin{proof}
-Дефинираме общото разширение $\tau^* = \tau_1 \cup \tau_2$. Тогава от Теорема~\ref{thm:monotone} следва:
-\[ s(f, \tau_1) \le s(f, \tau^*) \le S(f, \tau^*) \le S(f, \tau_2) \]
-Което доказва твърдението.
-\end{proof}
 
-\newpage
+\begin{proof}
+Дефинираме разбиването $\tau^{*} = \tau_1 \cup \tau_2$. Тогава от Теорема \ref{monotonnicity_darbu} следва:
+\[ s(f, \tau_1) \le s(f, \tau^{*}) \le S(f, \tau^{*}) \le S(f, \tau_2) \]
+\end{proof}
 
 \section{Дефиниция на Риманов интеграл чрез Дарбу}
 
-От Следствие~\ref{cor:any-partitions} виждаме, че множеството от всички малки суми $\{s(f, \tau)\}$ е ограничено отгоре от коя да е голяма сума, а множеството от големи суми $\{S(f, \tau)\}$ е ограничено отдолу. Съгласно аксиомата за непрекъснатост на реалните числа, съществуват следните точни граници:
+От предходното следствие виждаме, че множеството от всички малки суми $\{s(f, \tau)\}$ е ограничено отгоре от всяка голяма сума, а множеството от големи суми $\{S(f, \tau)\}$ е ограничено отдолу от коя да е малка сума на Дарбу. Съгласно аксиомата за непрекъснатост на реалните числа, съществуват следните точни граници:
 
-\begin{definition}[Долен и горен интеграл на Дарбу]~
+\begin{definition}[Долен и горен интеграл]
+Нека $f$ е ограничена функция в $[a,b]$. Дефинираме:
 \begin{enumerate}
-    \item Точната горна граница на всички малки суми се нарича \textbf{долен интеграл на Дарбу}:
+    \item \textbf{Долен интеграл} от $f$ в $[a,b]$: Точната горна граница на всички малки суми
     \[ \underline{\int_{a}^{b}} f(x)\,dx = \sup_{\tau} s(f, \tau) \]
-    \item Точната долна граница на всички големи суми се нарича \textbf{горен интеграл на Дарбу}:
+    \item \textbf{Горен интеграл} от $f$ в $[a,b]$: Точната долна граница на всички големи суми
     \[ \overline{\int_{a}^{b}} f(x)\,dx = \inf_{\tau} S(f, \tau) \]
 \end{enumerate}
-Винаги е изпълнено: $\underline{\int_{a}^{b}} f(x)\,dx \le \overline{\int_{a}^{b}} f(x)\,dx$ (следва директно от Следствие~\ref{cor:any-partitions}: $\sup_\tau s(f,\tau) \le \inf_\tau S(f,\tau)$).
 \end{definition}
+
+\begin{theorem}
+За всяка ограничена функция е изпълнено:
+
+\[ \underline{\int_a^b} f(x)\,dx \le \overline{\int_a^b} f(x)\,dx \]
+\end{theorem}
+
+\begin{proof}
+Наистина, нека $\tau_1$ и $\tau_2$ са произволни разбивания на $[a,b]$. От Следствие \ref{small_sum_is_smaller_than_bigger_sum} знаем, че:
+
+\[ s(f, \tau_1) \le S(f, \tau_2) \]
+
+Фиксираме разбиването $\tau_2$. Тогава горното неравенство е в сила за всяко $\tau_1$. Вземаме супремум по всички възможни разбивания $\tau_1$ отляво и получаваме:
+
+\[ \underline{\int_a^b} f(x)\,dx \le S(f, \tau_2) \]
+
+Тъй като разбиването $\tau_2$ е произволно избрано, горното неравенство е изпълнено за всяко $\tau_2$. Тогава вземаме инфимум по всички възможни разбивания $\tau_2$ отдясно, откъдето окончателно следва:
+
+\[ \underline{\int_a^b} f\,dx \le \overline{\int_a^b} f\,dx \]
+\end{proof}
 
 \begin{definition}[Риманов интеграл]
-Казваме, че ограничената функция $f(x)$ е \textbf{интегруема по Риман} в затворения интервал $[a, b]$, ако нейните долен и горен интеграли на Дарбу са равни. 
+Казваме, че ограничената функция $f(x)$ е \textbf{интегруема по Риман} в затворения интервал $[a, b]$, ако нейните долен и горен интеграли са равни. 
 
-Общата им стойност се нарича \textbf{определен (Риманов) интеграл} на функцията $f(x)$ от $a$ до $b$ и се означава с:
+Общата им стойност се нарича \textbf{определен (Риманов) интеграл} на функцията $f(x)$ в интервала $[a, b]$ и се означава с:
+
 \[ \int_{a}^{b} f(x)\,dx = \underline{\int_{a}^{b}} f(x)\,dx = \overline{\int_{a}^{b}} f(x)\,dx \]
 \end{definition}
-
-\newpage
 
 \section{Критерий за интегруемост}
 
@@ -314,229 +308,160 @@
     \[ s(f, \tau_1) > I - \frac{\varepsilon}{2} \]
     Аналогично, понеже $I = \inf_\tau S(f, \tau)$, съществува разбиване $\tau_2$, такова че:
     \[ S(f, \tau_2) < I + \frac{\varepsilon}{2} \]
-    Разглеждаме общото разширение $\tau = \tau_1 \cup \tau_2$. Тогава от свойствата за монотонност (Теорема~\ref{thm:monotone}) имаме:
+    Образуваме разбиването $\tau = \tau_1 \cup \tau_2$. Тогава от свойствата за монотонност (Теорема~\ref{monotonnicity_darbu}) имаме:
     \[ I - \frac{\varepsilon}{2} < s(f, \tau_1) \le s(f, \tau) \le S(f, \tau) \le S(f, \tau_2) < I + \frac{\varepsilon}{2} \]
     Оттук директно пресмятаме разликата:
     \[ S(f, \tau) - s(f, \tau) < \left(I + \frac{\varepsilon}{2}\right) - \left(I - \frac{\varepsilon}{2}\right) = \varepsilon \]
     
     \item \textbf{Достатъчност ($\Leftarrow$):}
-    Нека за всяко $\varepsilon > 0$ е изпълнено $S(f, \tau) - s(f, \tau) < \varepsilon$. По дефиниция за долния и горния интеграл знаем, че:
+    За произволно $\varepsilon > 0$ съществува разбиване $\tau$ в интервала $[a, b]$, за което $S(f, \tau) - s(f, \tau) < \varepsilon$. По дефиниция за долния и горния интеграл знаем, че:
     \[ s(f, \tau) \le \underline{\int_{a}^{b}} f(x)\,dx \le \overline{\int_{a}^{b}} f(x)\,dx \le S(f, \tau) \]
     Следователно разликата между горния и долния интеграл удовлетворява неравенството:
     \[ 0 \le \overline{\int_{a}^{b}} f(x)\,dx - \underline{\int_{a}^{b}} f(x)\,dx \le S(f, \tau) - s(f, \tau) < \varepsilon \]
-    Тъй като неравенството $0 \le \overline{\int_{a}^{b}} f(x)\,dx - \underline{\int_{a}^{b}} f(x)\,dx < \varepsilon$ е изпълнено за абсолютно всяко произволно малко $\varepsilon > 0$, единствената математическа възможност е тази разлика да бъде нула:
+    Тъй като $\epsilon > 0$ беше произволно, то неравенството $0 \le \overline{\int_{a}^{b}} f(x)\,dx - \underline{\int_{a}^{b}} f(x)\,dx < \varepsilon$ е изпълнено за всяко $\epsilon$, откъдето:
     \[ \overline{\int_{a}^{b}} f(x)\,dx = \underline{\int_{a}^{b}} f(x)\,dx \]
     Което означава, че функцията е интегруема по Риман.
 \end{enumerate}
 Теоремата е доказана.
 \end{proof}
 
-\newpage
-
 \section{Интегруемост на непрекъснатите функции}
 
-За доказване на следващите фундаментални теореми се използват следните две теореми, които съгласно изискванията на конспекта се приемат без доказателство:
+\begin{lemma}
+Нека $f$ е ограничена функция в интервала $[x_{i-1}, x_i]$, а $m_i$ и $M_i$ са съответно нейните инфимум и супремум в него. Тогава е изпълнено равенството:
+\[ M_i - m_i = \sup \{ |f(x') - f(x'')| : x', x'' \in [x_{i-1}, x_i] \} \]
+\end{lemma}
 
-\begin{theorem}[Теорема на Вайерщрас]\label{thm:weierstrass}
-Всяка непрекъсната функция в краен и затворен интервал $[a, b]$ е ограничена и достига своя минимум и максимум.
+\begin{proof}
+Означаваме за краткост $c = \sup \{ |f(x') - f(x'')| : x', x'' \in [x_{i-1}, x_i] \}$.
+По дефиниция за всяко $x', x'' \in [x_{i-1}, x_i]$ знаем, че $f(x') \le M_i$ и $f(x'') \ge m_i$, откъдето следва $f(x') - f(x'') \le M_i - m_i$. Понеже $x'$ и $x''$ са симетрични, аналогично е вярно $f(x'') - f(x') \le M_i - m_i$, следователно $|f(x') - f(x'')| \le M_i - m_i$. Тъй като това е в сила за всяка двойка точки, супремумът също не надминава тази стойност:
+\[ c \le M_i - m_i \]
+Да допуснем, че е в сила строго неравенство: $c < M_i - m_i$.
+Нека дефинираме положителното число $\eta = M_i - m_i - c > 0$. Тогава можем да запишем:
+\[ M_i - \frac{\eta}{2} < M_i \implies \text{съществува } x' \in [x_{i-1}, x_i], \text{ такова че } f(x') > M_i - \frac{\eta}{2} \]
+\[ m_i + \frac{\eta}{2} > m_i \implies \text{съществува } x'' \in [x_{i-1}, x_i], \text{ такова че } f(x'') < m_i + \frac{\eta}{2} \]
+Като извадим двете неравенства, получаваме:
+\[ f(x') - f(x'') > M_i - \frac{\eta}{2} - \left(m_i + \frac{\eta}{2}\right) = M_i - m_i - \eta = c \]
+Следователно $|f(x') - f(x'')| > c$, което е директно противоречие с дефиницията на $c$ като горна граница. С това лемата е доказана, т.е. $M_i - m_i = c$.
+\end{proof}
+
+\begin{theorem}[Теорема на Кантор за равномерната непрекъснатост]
+Всяка функция, която е непрекъсната в краен и затворен интервал $[a, b]$, е равномерно непрекъсната в него. Това означава, че за всяко $\epsilon_0 > 0$ съществува $\delta > 0$ такова, че за всеки две точки $x^{\prime}, x^{\prime\prime} \in [a, b]$, за които $|x^{\prime} - x^{\prime\prime}| < \delta$, е изпълнено $|f(x^{\prime}) - f(x^{\prime\prime})| < \epsilon_0$.
 \end{theorem}
 
-\begin{theorem}[Теорема на Кантор за равномерната непрекъснатост]\label{thm:cantor}
-Всяка функция, която е непрекъсната в краен и затворен интервал $[a, b]$, е равномерно непрекъсната в него. Това означава, че за всяко $\varepsilon_0 > 0$ съществува $\delta_0 > 0$ такова, че за всеки две точки $x', x'' \in [a, b]$, за които $|x' - x''| < \delta_0$, е изпълнено:
-\[ |f(x') - f(x'')| < \varepsilon_0 \]
-\end{theorem}
-
-\begin{theorem}[Непрекъснатите функции са интегруеми]\label{thm:continuous-integrable}
+\begin{theorem}
 Всяка непрекъсната функция $f(x)$ в крайния и затворен интервал $[a, b]$ е интегруема по Риман в него.
 \end{theorem}
 
 \begin{proof}
-Нека изберем произволно число $\varepsilon > 0$. Понеже $f(x)$ е непрекъсната в $[a, b]$, съгласно Теоремата на Кантор тя е равномерно непрекъсната в този интервал.
+Нека изберем произволно число $\epsilon > 0$. Понеже $f(x)$ е непрекъсната в $[a, b]$, съгласно Теоремата на Кантор тя е равномерно непрекъсната в този интервал. Нека за $\epsilon_0 = \frac{\epsilon}{2(b-a)} > 0$. Тогава съществува такова $\delta > 0$, че за произволни точки със свойството $|x' - x''| < \delta$ е изпълнено:
+\[ |f(x') - f(x'')| < \frac{\epsilon}{2(b-a)} \]
+Конструираме произволно разбиване $\tau$ на интервала $[a, b]$, чийто диаметър удовлетворява $\delta(\tau) < \delta$. Това означава, че за всеки интервал на разбиването $[x_{i-1}, x_i]$ неговата дължина е $\Delta x_i < \delta$. 
 
-Избираме стойност за $\varepsilon_0 = \frac{\varepsilon}{b - a} > 0$. Тогава от равномерната непрекъснатост следва, че съществува $\delta > 0$ такова, че за произволни $x', x'' \in [a, b]$ с $|x' - x''| < \delta$ е вярно:
-\[ |f(x') - f(x'')| < \frac{\varepsilon}{b - a} \]
-
-Конструираме произволно разбиване $\tau$ на интервала $[a, b]$, чийто диаметър е по-малък от намереното $\delta$, т.е. $\delta(\tau) < \delta$. Това означава, че за всеки частичен интервал $[x_{i-1}, x_i]$ неговата дължина е $\Delta x_i < \delta$.
-
-Тъй като функцията $f(x)$ е непрекъсната във всеки затворен частичен интервал $[x_{i-1}, x_i]$, по теоремата на Вайерщрас тя е ограничена и достига своя минимум $m_i$ и максимум $M_i$ в конкретни точки от този интервал. Нека:
-\[ m_i = f(x_i'), \quad M_i = f(x_i'') \quad \text{където } x_i', x_i'' \in [x_{i-1}, x_i] \]
-
-Тъй като и двете точки $x_i'$ и $x_i''$ принадлежат на един и същ частичен интервал, разстоянието между тях е строго по-малко от неговата дължина, а тя е по-малка от $\delta$:
-\[ |x_i' - x_i''| \le \Delta x_i \le \delta(\tau) < \delta \]
-Прилагаме свойството за равномерна непрекъснатост за тези две точки:
-\[ M_i - m_i = f(x_i'') - f(x_i') < \frac{\varepsilon}{b - a} \]
-
+Тогава за кои да е две точки $x', x'' \in [x_{i-1}, x_i]$ е в сила $|x' - x''| \le \Delta x_i \le \delta(\tau) < \delta$. Прилагайки свойството за равномерна непрекъснатост, имаме $|f(x') - f(x'')| < \frac{\epsilon}{2(b-a)}$. Като вземем супремум по двете променливи в този интервал и използваме доказаната Лема 1, получаваме:
+\[ M_i - m_i = \sup |f(x') - f(x'')| \le \frac{\epsilon}{2(b-a)} < \frac{\epsilon}{b-a} \]
 Сега образуваме разликата между голямата и малката суми на Дарбу за разбиването $\tau$:
-\[ S(f, \tau) - s(f, \tau) = \sum_{i=1}^{n} M_i \Delta x_i - \sum_{i=1}^{n} m_i \Delta x_i = \sum_{i=1}^{n} (M_i - m_i) \Delta x_i \]
-Заместваме полученото по-горе неравенство $M_i - m_i < \frac{\varepsilon}{b - a}$:
-\[ S(f, \tau) - s(f, \tau) < \sum_{i=1}^{n} \frac{\varepsilon}{b - a} \Delta x_i = \frac{\varepsilon}{b - a} \sum_{i=1}^{n} \Delta x_i \]
-Тъй като сумата от дължините на всички частични интервали е точно равна на дължината на целия интервал, т.е. $\sum_{i=1}^{n} \Delta x_i = b - a$, получаваме:
-\[ S(f, \tau) - s(f, \tau) < \frac{\varepsilon}{b - a} \cdot (b - a) = \varepsilon \]
-
-Доказахме, че за всяко $\varepsilon > 0$ съществува разбиване $\tau$, за което $S(f, \tau) - s(f, \tau) < \varepsilon$. Съгласно Критерия на Дарбу (Теорема~\ref{thm:darboux-criterion}), функцията $f(x)$ е интегруема по Риман в $[a, b]$.
+\[ S(f, \tau) - s(f, \tau) = \sum_{i=1}^n M_i \Delta x_i - \sum_{i=1}^n m_i \Delta x_i = \sum_{i=1}^n (M_i - m_i)\Delta x_i \]
+Заместваме намереното неравенство $M_i - m_i < \frac{\epsilon}{b-a}$:
+\[ S(f, \tau) - s(f, \tau) < \sum_{i=1}^n \frac{\epsilon}{b-a} \Delta x_i = \frac{\epsilon}{b-a} \sum_{i=1}^n \Delta x_i \]
+Тъй като сумата от дължините на всички интервали на разбиването е точно равна на дължината на целия интервал, т.е. $\sum_{i=1}^n \Delta x_i = b - a$, получаваме:
+\[ S(f, \tau) - s(f, \tau) < \frac{\epsilon}{b-a} \cdot (b - a) = \epsilon \]
+Доказахме, че за всяко $\epsilon > 0$ съществува разбиване $\tau$, за което $S(f, \tau) - s(f, \tau) < \epsilon$. Съгласно Критерия на Дарбу (Теорема 2), функцията $f(x)$ е интегруема по Риман в $[a, b]$.
 \end{proof}
-
-\newpage
 
 \section{Основни свойства на определения интеграл}
 
 Тук изброяваме основните свойства на Римановия интеграл (съгласно изискването на конспекта, без доказателство):
 \begin{enumerate}
-    \item \textbf{Линейност:} Ако $f$ и $g$ са интегруеми в $[a, b]$, и $\alpha, \beta \in \mathbb{R}$, то $\alpha f + \beta g$ е интегруема и:
-    \[ \int_{a}^{b} (\alpha f(x) + \beta g(x))\,dx = \alpha \int_{a}^{b} f(x)\,dx + \beta \int_{a}^{b} g(x)\,dx \]
-    \item \textbf{Адитивност спрямо интервала:} Ако $f$ е интегруема в най-широкия интервал, съдържащ точките $a, b, c$, то:
-    \[ \int_{a}^{b} f(x)\,dx = \int_{a}^{c} f(x)\,dx + \int_{c}^{b} f(x)\,dx \]
-    \item \textbf{Интегриране на неравенства:} Ако $f(x) \le g(x)$ за всяко $x \in [a, b]$, то:
-    \[ \int_{a}^{b} f(x)\,dx \le \int_{a}^{b} g(x)\,dx \]
-    \item \textbf{Нулев интеграл:} $\displaystyle\int_{a}^{a} f(x)\,dx = 0$
-    \item \textbf{Смяна на посоката:} $\displaystyle\int_{b}^{a} f(x)\,dx = -\int_{a}^{b} f(x)\,dx$
+    \item \textbf{Линейност}: Ако $f$ и $g$ са интегруеми в $[a, b]$ и $\alpha, \beta \in \mathbb{R}$, то $\alpha f + \beta g$ е интегруема и:
+    \[ \int_a^b (\alpha f(x) + \beta g(x))dx = \alpha \int_a^b f(x)dx + \beta \int_a^b g(x)dx \]
+    \item \textbf{Адитивност спрямо интервала}: Ако функцията е интегруема в най-големия интервал, съдържащ точките $a, b, c$, то независимо от взаимното разположение на трите точки е изпълнено:
+    \[ \int_a^b f(x)dx = \int_a^c f(x)dx + \int_c^b f(x)dx \]
+    \item \textbf{Интегриране на неравенства}: Ако $f(x) \le g(x)$ за всяко $x \in [a, b]$, то:
+    \[ \int_a^b f(x)dx \le \int_a^b g(x)dx \]
+    \item \textbf{Нулев интеграл}: $\int_a^a f(x)dx = 0$
+    \item \textbf{Смяна на посоката}: $\int_b^a f(x)dx = -\int_a^b f(x)dx$
 \end{enumerate}
 
 \subsection{Теорема за средните стойности в интегралното смятане}
 
-\begin{theorem}[Теорема за средната стойност]\label{thm:mean-value}
+\begin{theorem}[Теорема за средната стойност]
 Ако функцията $f(x)$ е непрекъсната в затворения интервал $[a, b]$, то съществува точка $c \in [a, b]$, такава че:
-\[ \int_{a}^{b} f(x)\,dx = f(c)(b - a) \]
+\[ \int_a^b f(x)dx = f(c)(b - a) \]
 \end{theorem}
 
 \begin{proof}
-Тъй като $f(x)$ е непрекъсната в $[a, b]$, по теоремата на Вайерщрас тя достига своя точен минимум $m$ и точен максимум $M$ в този интервал:
+Тъй като $f(x)$ е непрекъсната в $[a, b]$, тя е ограничена и притежава инфимум $m$ и супремум $M$ в този интервал:
 \[ m \le f(x) \le M \quad \forall x \in [a, b] \]
-Прилагаме свойството за интегриране на неравенства върху горния израз в граници от $a$ до $b$:
-\[ \int_{a}^{b} m\,dx \le \int_{a}^{b} f(x)\,dx \le \int_{a}^{b} M\,dx \]
-Тъй като $m$ и $M$ са константи, техните интеграли са просто $m(b-a)$ и $M(b-a)$:
-\[ m(b - a) \le \int_{a}^{b} f(x)\,dx \le M(b - a) \]
-Тъй като $b > a$, дължината на интервала е положителна $(b - a) > 0$. Разделяме трите страни на неравенството на $(b - a)$:
-\[ m \le \frac{1}{b - a}\int_{a}^{b} f(x)\,dx \le M \]
-
-Означаваме средната стойност на интеграла с числото $\mu = \frac{1}{b - a}\int_{a}^{b} f(x)\,dx$. Имаме $m \le \mu \le M$.
-
-Сега използваме друга фундаментална теорема за непрекъснати функции (\textbf{теорема на Болцано за междинните стойности}): всяка непрекъсната функция в затворен интервал приема всички стойности между минимума си $m$ и максимума си $M$. 
-
-Тъй като числото $\mu$ се намира в интервала $[m, M]$, то задължително съществува точка $c \in [a, b]$, за която:
-\[ f(c) = \mu \quad \Rightarrow \quad f(c) = \frac{1}{b - a}\int_{a}^{b} f(x)\,dx \]
-Умножавайки двете страни по $(b - a)$, получаваме окончателното твърдение:
-\[ \int_{a}^{b} f(x)\,dx = f(c)(b - a) \]
-Теоремата е доказана.
+Прилагаме свойството за интегриране на неравенства в граници от $a$ до $b$:
+\[ \int_a^b m \, dx \le \int_a^b f(x)dx \le \int_a^b M \, dx \]
+Тъй като $m$ и $M$ са константи, техните интеграли са съответно $m(b-a)$ и $M(b-a)$ (това следва от факта, че за произволни разбивания на константна функция малките и големите суми на Дарбу съвпадат и са равни на лицето на правоъгълника ограничен от константната функция и разглеждания интервал):
+\[ m(b-a) \le \int_a^b f(x)dx \le M(b-a) \]
+Тъй като $b > a$, дължината на интервала е положителна ($b-a > 0$). Разделяме трите страни на неравенството на $(b-a)$:
+\[ m \le \frac{1}{b-a}\int_a^b f(x)dx \le M \]
+Означаваме средната стойност на интеграла с числото $\mu = \frac{1}{b-a}\int_a^b f(x)dx$. Имаме $m \le \mu \le M$. Съгласно теоремата на Болцано за междинните стойности, всяка непрекъсната функция в затворен интервал приема всички стойности между инфимума си $m$ и супремума си $M$. Тъй като числото $\mu$ се намира в интервала $[m, M]$, то задължително съществува точка $c \in [a, b]$, за която $f(c) = \mu$. Умножавайки двете страни по $(b-a)$, получаваме окончателното твърдение:
+\[ \int_a^b f(x)dx = f(c)(b - a) \]
 \end{proof}
-
-\newpage
 
 \section{Теорема на Нютон-Лайбниц}
 
-Тази теорема установява дълбоката връзка между диференциалното смятане (намиране на производна) и интегралното смятане (намиране на лице). За целта въвеждаме понятието "интеграл като функция на горната граница".
-
-\begin{theorem}[Теорема за производна на интеграл по горната граница]\label{thm:upper-limit}
+\begin{theorem}[Нютон-Лайбниц]
 Нека $f(x)$ е непрекъсната функция в $[a, b]$. Тогава функцията $F(x)$, дефинирана като:
-\[ F(x) = \int_{a}^{x} f(t)\,dt \quad \text{за } x \in [a, b] \]
-е диференцируема в $(a, b)$ и нейната производна удовлетворява равенството:
-\[ F'(x) = f(x) \quad \forall x \in (a, b) \]
-Това означава, че $F(x)$ е примитивна функция на $f(x)$.
+\[ F(x) = \int_a^x f(t)dt \quad \text{за } x \in [a, b] \]
+е диференцируема в $(a, b)$ и нейната производна удовлетворява равенството $F^{\prime}(x) = f(x)$ за всяко $x \in (a, b)$.
 \end{theorem}
-
-Геометричният смисъл на теоремата е показан по-долу:
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[scale=0.9]
-  % f(t) = 0.5*sin(45*t) + 1.5  (TikZ sin() in degrees; 45t deg = pi*t/4 rad)
-  % Domain [0,5]; fixed point x=3, x+h=3.6
-  % f(3) = 0.5*sin(135)+1.5 = 1.854,   f(3.6) = 0.5*sin(162)+1.5 = 1.655
-
-  % Blue area: F(x) = integral from a to x
-  \fill[blue!15] (0.8,0)
-    -- plot[domain=0.8:3, samples=60] (\x, {0.5*sin(45*\x) + 1.5})
-    -- (3,0) -- cycle;
-
-  % Orange strip: F(x+h) - F(x)
-  \fill[orange!35] (3,0)
-    -- plot[domain=3:3.6, samples=20] (\x, {0.5*sin(45*\x) + 1.5})
-    -- (3.6,0) -- cycle;
-
-  % Curve over full domain
-  \draw[black, very thick] plot[domain=0:5, samples=100]
-    (\x, {0.5*sin(45*\x) + 1.5});
-
-  % Axes
-  \draw[-{Stealth}] (-0.3,0) -- (5.7,0) node[right] {$t$};
-  \draw[-{Stealth}] (0,-0.3) -- (0,2.8) node[above] {$y$};
-
-  % Dashed vertical lines at x and x+h
-  \draw[gray, dashed] (3,0) -- (3,1.854);
-  \draw[gray, dashed] (3.6,0) -- (3.6,1.655);
-
-  % Dashed horizontal line at f(x) height over the strip (rectangle approximation)
-  \draw[gray, dashed] (3,1.854) -- (3.6,1.854);
-
-  % X-axis ticks and labels
-  \draw (0.8,1.5pt) -- (0.8,-1.5pt); \node[below, font=\scriptsize] at (0.8,-0.07) {$a$};
-  \draw (3,1.5pt) -- (3,-1.5pt);   \node[below, font=\scriptsize] at (3,-0.07)   {$x$};
-  \draw (3.6,1.5pt) -- (3.6,-1.5pt); \node[below, font=\scriptsize] at (3.6,-0.07) {$x{+}h$};
-  \draw (5,1.5pt) -- (5,-1.5pt);   \node[below, font=\scriptsize] at (5,-0.07)   {$b$};
-
-  % Y-axis tick and label for f(x)
-  \draw (1.5pt,1.854) -- (-1.5pt,1.854);
-  \node[left, font=\scriptsize] at (-0.05,1.854) {$f(x)$};
-
-  % F(x) label inside blue region
-  \node[blue!70!black, font=\small] at (1.2,0.55) {$F(x)$};
-
-  % h dimension below x-axis
-  \draw[<->, thin, gray] (3,-0.22) -- (3.6,-0.22)
-    node[midway, below, font=\scriptsize] {$h$};
-
-  % Label for orange strip
-  \node[orange!80!black, font=\scriptsize, align=center] at (4.6,1.75)
-    {$\Delta F \approx f(x)\!\cdot\! h$};
-  \draw[->, orange!80!black, thin] (4.2,1.7) -- (3.5,0.85);
-
+\begin{tikzpicture}[scale=1.0]
+  \draw[fill=blue!15] (0.5,0) -- plot[domain=0.5:2.5, samples=50] (\x, {2 + 0.3*sin(\x*180/3.14)}) -- (2.5,0) -- cycle;
+  \draw[fill=orange!40] (2.5,0) -- plot[domain=2.5:3.2, samples=50] (\x, {2 + 0.3*sin(\x*180/3.14)}) -- (3.2,0) -- cycle;
+  \draw[dashed, thick] (2.5, {2 + 0.3*sin(2.5*180/3.14)}) -- (3.2, {2 + 0.3*sin(2.5*180/3.14)});
+  \draw[dashed] (3.2, 0) -- (3.2, {2 + 0.3*sin(2.5*180/3.14)});
+  \draw[black, very thick] plot[domain=0.2:4.0, samples=80] (\x, {2 + 0.3*sin(\x*180/3.14)});
+  \draw[-{Stealth}] (-0.2,0) -- (4.5,0) node[right] {$t$};
+  \draw[-{Stealth}] (0,-0.2) -- (0,3.0) node[above] {$y$};
+  \node[below] at (0.5,0) {$a$};
+  \node[below] at (2.5,0) {$x$};
+  \node[below] at (3.2,0) {$x+h$};
+  \node[below] at (4.0,0) {$b$};
+  \node at (1.5, 0.8) {$F(x)$};
+  \node[orange!90!black] at (3.6, 1.2) {$\Delta F$};
+  \draw[<->] (2.5, -0.4) -- (3.2, -0.4) node[midway, below] {$h$};
 \end{tikzpicture}
-\caption{Геометричен смисъл на $F(x) = \int_a^x f(t)\,dt$. Синята площ е $F(x)$. Оранжевата ивица е приращението $\Delta F = F(x+h) - F(x) = \int_x^{x+h} f(t)\,dt$, което за малко $h > 0$ е приблизително равно на лицето на правоъгълника с основа $h$ и височина $f(x)$ (пунктиран). Оттук $F'(x) = \lim_{h \to 0} \dfrac{\Delta F}{h} \approx \dfrac{f(x)\cdot h}{h} = f(x)$.}
+\caption{Геометричен смисъл на $F(x) = \int_a^x f(t)dt$}
 \end{figure}
 
 \begin{proof}
-Нека фиксираме произволна точка $x \in (a, b)$ и дадем нарастване $h \neq 0$ такова, че $(x + h) \in [a, b]$. По дефиниция за производна, трябва да пресметнем границата на диференчното частно при $h \to 0$:
-\[ F(x + h) - F(x) = \int_{a}^{x+h} f(t)\,dt - \int_{a}^{x} f(t)\,dt \]
-Използваме свойството за адитивност на интеграла $\int_{a}^{x+h} = \int_{a}^{x} + \int_{x}^{x+h}$:
-\[ F(x + h) - F(x) = \left( \int_{a}^{x} f(t)\,dt + \int_{x}^{x+h} f(t)\,dt \right) - \int_{a}^{x} f(t)\,dt = \int_{x}^{x+h} f(t)\,dt \]
-
-Тъй като $f(t)$ е непрекъсната в частичния интервал с краища $x$ и $x+h$, прилагаме \textbf{Теоремата за средната стойност} (Теорема~\ref{thm:mean-value}) за този интеграл. Следователно съществува точка $c_h$ между $x$ и $x+h$, такава че:
-\[ \int_{x}^{x+h} f(t)\,dt = f(c_h) \cdot \left[ (x + h) - x \right] = f(c_h) \cdot h \]
+Нека фиксираме произволна точка $x \in (a, b)$ и нека $h \neq 0$ е такова, че $(x + h) \in [a, b]$. За да покажем, че производната на $F$ в точката $x$ съществува, трябва да пресметнем границата на диференчното частно при $h \to 0$:
+\[ F(x+h) - F(x) = \int_a^{x+h} f(t)dt - \int_a^x f(t)dt \]
+Използваме свойството адитивност на интеграла $\int_a^{x+h} = \int_a^x + \int_x^{x+h}$:
+\[ F(x+h) - F(x) = \int_a^x f(t)dt + \int_x^{x+h} f(t)dt - \int_a^x f(t)dt = \int_x^{x+h} f(t)dt \]
+Тъй като $f(t)$ е непрекъсната в затворения интервал с краища $x$ и $x+h$, прилагаме Теоремата за средната стойност (Теорема 6) за този интеграл. Следователно съществува точка $c_h$ между $x$ и $x+h$ (което означава $x \le c_h \le x+h$ при $h>0$ или $x+h \le c_h \le x$ при $h<0$), такава че:
+\[ \int_x^{x+h} f(t)dt = f(c_h) \cdot [(x+h) - x] = f(c_h) \cdot h \]
 Тогава диференчното частно става:
-\[ \frac{F(x + h) - F(x)}{h} = \frac{f(c_h) \cdot h}{h} = f(c_h) \]
-
-Сега извършваме граничен преход при $h \to 0$. От неравенството $x \le c_h \le x+h$ следва, че $c_h \to x$ при $h \to 0$.
-
-Понеже по условие функцията $f$ е непрекъсната, можем да вкараме границата в аргумента:
-\[ F'(x) = \lim_{h \to 0} \frac{F(x + h) - F(x)}{h} = \lim_{h \to 0} f(c_h) = f\left(\lim_{h \to 0} c_h\right) = f(x) \]
-Доказахме, че $F'(x) = f(x)$, което означава, че интегралът като функция на горната граница е примитивна функция на подинтегралната функция.
+\[ \frac{F(x+h) - F(x)}{h} = \frac{f(c_h) \cdot h}{h} = f(c_h) \]
+Сега извършваме граничен преход при $h \to 0$. Тъй като точката $c_h$ е винаги заключена между $x$ и $x+h$, от теоремата за трите функции следва, че $\lim_{h \to 0} c_h = x$. Понеже по условие функцията $f$ е непрекъсната, можем да извършим прехода:
+\[ F^{\prime}(x) = \lim_{h \to 0} \frac{F(x+h) - F(x)}{h} = \lim_{h \to 0} f(c_h) = f\left(\lim_{h \to 0} c_h\right) = f(x) \]
 \end{proof}
 
-\begin{theorem}[Формула на Нютон-Лайбниц]\label{thm:newton-leibniz}
-Нека $f(x)$ е непрекъсната функция в $[a, b]$ и $\Phi(x)$ е \textbf{произволна} нейна примитивна функция в този интервал (т.е. $\Phi'(x) = f(x)$). Тогава:
-\[ \int_{a}^{b} f(x)\,dx = \Phi(b) - \Phi(a) \]
+\begin{theorem}[Формула на Нютон-Лайбниц]
+Нека $f(x)$ е непрекъсната функция в $[a, b]$ и $\Phi(x)$ е произволна нейна примитивна функция в този интервал (т.е. $\Phi^{\prime}(x) = f(x)$). Тогава:
+\[ \int_a^b f(x)dx = \Phi(b) - \Phi(a) \]
 \end{theorem}
 
 \begin{proof}
-От Теорема~\ref{thm:upper-limit} знаем, че функцията $F(x) = \int_{a}^{x} f(t)\,dt$ е конкретна примитивна функция на $f(x)$ в $[a, b]$. 
-
-От основна теорема в диференциалното смятане (следствие от Лагранж) знаем, че кои да е две примитивни функции на една и съща подинтегрална функция се различават най-много с константа $C \in \mathbb{R}$. Тъй като по условие $\Phi(x)$ е някаква произволна примитивна функция, то:
-\[ F(x) = \Phi(x) + C \quad \Rightarrow \quad \int_{a}^{x} f(t)\,dt = \Phi(x) + C \]
-
-За да определим неизвестната константа $C$, заместваме в горното равенство стойността $x = a$:
-\[ \int_{a}^{a} f(t)\,dt = \Phi(a) + C \]
-Тъй като интеграл с еднакви граници е равен на нула ($\int_{a}^{a} = 0$), получаваме:
-\[ 0 = \Phi(a) + C \quad \Rightarrow \quad C = -\Phi(a) \]
-
-Заместваме намерената стойност за константата $C$ обратно в общото уравнение:
-\[ \int_{a}^{x} f(t)\,dt = \Phi(x) - \Phi(a) \]
+От Теорема 7 знаем, че функцията $F(x) = \int_a^x f(t)dt$ е примитивна функция на $f(x)$ в $[a, b]$. От основна теорема в диференциалното смятане знаем, че кои да е две примитивни функции на една и съща функция се различават най-много с константа $C \in \mathbb{R}$. Тъй като по условие $\Phi(x)$ е примитивна функция, то:
+\[ F(x) = \Phi(x) + C \implies \int_a^x f(t)dt = \Phi(x) + C \]
+За да определим неизвестната константа $C$, заместваме стойността $x = a$:
+\[ \int_a^a f(t)dt = \Phi(a) + C \]
+Тъй като интеграл с еднакви граници е равен на нула, получаваме:
+\[ 0 = \Phi(a) + C \implies C = -\Phi(a) \]
+Заместваме намерената стойност за константата и получаваме:
+\[ \int_a^x f(t)dt = \Phi(x) - \Phi(a) \]
 Сега, за да намерим крайния определен интеграл в граници от $a$ до $b$, просто заместваме променливата $x$ с горната граница $b$:
-\[ \int_{a}^{b} f(t)\,dt = \Phi(b) - \Phi(a) \]
-Тъй като променливата на интегриране е "променлива-фантом" (dummy variable), можем да сменим буквата обратно на $x$:
-\[ \int_{a}^{b} f(x)\,dx = \Phi(b) - \Phi(a) \]
-С това фундаменталната формула на Нютон-Лайбниц е напълно доказана.
+\[ \int_a^b f(t)dt = \Phi(b) - \Phi(a) \]
 \end{proof}
 
 \end{FlushLeft}
-
 \end{document}
