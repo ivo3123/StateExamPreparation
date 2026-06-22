@@ -54,7 +54,7 @@
 
 \title{Модели на разпределени софтуерни архитектури.\\ Среди и протоколи за разпределени приложения.}
 \author{Ивайло Андреев + chat gpt 5.5, Claude Sonnet 4.6}
-\date{29 май 2026}
+\date{22 юни 2026}
 
 \graphicspath{ {./pictures/} }
 
@@ -519,107 +519,6 @@
 
 \textbf{\textit{Многоагентните системи (MAS)}} се състоят от множество взаимодействащи агенти.
 Приложения: роботика, AI системи, симулации, автоматизирана търговия, разпределено управление.
-
-
-\section{Среди и протоколи за разпределени приложения}
-
-\subsection{Middleware}
-
-\textbf{\textit{Middleware}} е слой от софтуер между операционната система и приложението,
-осигуряващ стандартизирана \textbf{комуникация, прозрачност и координация} между разпределените компоненти.
-Скрива хетерогенността на хардуера, ОС и мрежата.
-
-Основни функции на middleware:
-\begin{itemize}
-    \item Именуване и адресиране на компоненти
-    \item Маршалинг/демаршалинг на данни (сериализация)
-    \item Управление на транзакции
-    \item Сигурност и автентикация
-    \item Балансиране на натоварването
-\end{itemize}
-
-\subsection{RPC и RMI}
-
-\textbf{\textit{RPC (Remote Procedure Call)}} позволява извикване на процедура на отдалечен възел,
-прозрачно за извикващия — като локална функция. Middleware се грижи за сериализацията на параметрите
-(\textbf{маршалинг}) и десериализацията на резултата (\textbf{демаршалинг}).
-\textbf{Примери:} Sun RPC, gRPC (Google, базиран на HTTP/2 и Protocol Buffers).
-
-\textbf{\textit{RMI (Remote Method Invocation)}} е обектно-ориентираната версия на RPC за \textbf{Java}.
-Позволява извикване на методи на отдалечени обекти. Използва \textbf{stub} (клиентска страна) и
-\textbf{skeleton} (сървърна страна) за прозрачна комуникация.
-
-\subsection{CORBA}
-
-\textbf{\textit{CORBA (Common Object Request Broker Architecture)}} е платформено-независим стандарт
-на OMG за комуникация между разпределени обекти.
-
-Ключови компоненти:
-\begin{itemize}
-    \item \textbf{ORB (Object Request Broker)} — посредникът, маршрутизиращ заявките между обекти
-    \item \textbf{IDL (Interface Definition Language)} — езиково-неутрален език за описание на интерфейси
-    \item \textbf{IIOP (Internet Inter-ORB Protocol)} — протоколът за комуникация между ORB-ове
-    \item \textbf{Naming Service} — регистър за именуване на обекти (аналог на DNS)
-\end{itemize}
-
-CORBA решава хетерогенността: компоненти на различни езици (C++, Java, Python) могат да комуникират
-прозрачно чрез IDL-дефинирани интерфейси.
-
-\subsection{Web услуги — SOAP и REST}
-
-\subsubsection{SOAP}
-\textbf{\textit{SOAP (Simple Object Access Protocol)}} е XML-базиран протокол за обмен на съобщения.
-Услугата се описва чрез \textbf{WSDL}, а регистрирането/намирането — чрез \textbf{UDDI}.
-
-Характеристики: строго типизиран контракт, поддръжка на транзакции (WS-AtomicTransaction),
-сигурност (WS-Security), подходящ за enterprise среди.
-
-\subsubsection{REST}
-\textbf{\textit{REST (Representational State Transfer)}} е архитектурен стил за Web API, базиран на \textbf{HTTP}.
-
-Основни принципи:
-\begin{itemize}
-    \item Ресурсите се идентифицират с \textbf{URI}
-    \item Операции чрез стандартни HTTP методи: \textbf{GET, POST, PUT, DELETE}
-    \item \textbf{Stateless} — всяка заявка е самостоятелна, без сесийно състояние на сървъра
-    \item Представянията са в JSON или XML
-\end{itemize}
-
-\begin{center}
-    \begin{tabular}{ | m{45mm} | m{45mm} | m{45mm} | }
-    \hline
-    \textbf{Параметър} & \textbf{SOAP} & \textbf{REST} \\
-    \hline
-    Протокол & SOAP (XML) & HTTP \\
-    \hline
-    Формат & само XML & JSON, XML и др. \\
-    \hline
-    Контракт & WSDL (задължителен) & OpenAPI (незадължителен) \\
-    \hline
-    Сложност & висока & ниска \\
-    \hline
-    Приложение & enterprise, банки & Web API, микросървиси \\
-    \hline
-    \end{tabular}
-\end{center}
-
-\subsection{Message Brokers (опашки за съобщения)}
-
-\textbf{\textit{Message broker-ите}} осигуряват \textbf{асинхронен} обмен на съобщения между компоненти.
-Издателят изпраща съобщение до брокера, а консуматорът го получава когато е готов —
-двата компонента не трябва да са активни едновременно.
-
-Функции:
-\begin{itemize}
-    \item \textbf{Буфериране} — съобщенията се съхраняват до обработка
-    \item \textbf{Маршрутизиране} — по topic или content-based (вж. Publisher/Subscriber)
-    \item \textbf{Гарантирана доставка} — exactly-once, at-least-once семантика
-    \item \textbf{Мащабируемост} — разпределени опашки при голям товар
-\end{itemize}
-
-\textbf{Примери:} Apache Kafka (log-базиран, висока производителност), RabbitMQ (AMQP протокол),
-Apache ActiveMQ, AWS SQS.
-
 
 \end{FlushLeft}
 
