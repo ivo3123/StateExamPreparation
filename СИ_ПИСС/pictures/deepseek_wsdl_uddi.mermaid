@@ -1,0 +1,36 @@
+flowchart TD
+    subgraph WSDL["📄 WSDL ФАЙЛ (Договорът)"]
+        A["🔹 АБСТРАКТНА ЧАСТ<br/>(Логически интерфейс)"]
+        C["🔸 КОНКРЕТНА ЧАСТ<br/>(Физически детайли)"]
+        
+        A --> A1["• types (XML типове)"]
+        A --> A2["• message (вход/изход)"]
+        A --> A3["• portType (операции)"]
+        
+        C --> C1["• binding (SOAP/HTTP)"]
+        C --> C2["• service (Endpoints)"]
+    end
+
+    subgraph UDDI["📒 UDDI РЕГИСТЪР"]
+        W["📄 БЕЛИ страници<br/>(КОЙ - компанията)"]
+        Y["🟨 ЖЪЛТИ страници<br/>(КАКВА - категория)"]
+        G["🟩 ЗЕЛЕНИ страници<br/>(КАК - WSDL файл)"]
+        
+        W --> Y --> G
+    end
+
+    WSDL -.->|"се публикува в"| UDDI
+    G -.->|"съдържа"| WSDL
+
+    style WSDL fill:#2d2d2d,stroke:#fff,color:#fff
+    style UDDI fill:#2d2d2d,stroke:#fff,color:#fff
+    style A fill:#1a3a5c,stroke:#4a9eff,color:#fff
+    style C fill:#1a5c3a,stroke:#4aff9e,color:#fff
+    style A1 fill:#2d4a6a,stroke:#4a9eff,color:#fff
+    style A2 fill:#2d4a6a,stroke:#4a9eff,color:#fff
+    style A3 fill:#2d4a6a,stroke:#4a9eff,color:#fff
+    style C1 fill:#2d6a4a,stroke:#4aff9e,color:#fff
+    style C2 fill:#2d6a4a,stroke:#4aff9e,color:#fff
+    style W fill:#4a3a2a,stroke:#ffcc00,color:#fff
+    style Y fill:#4a4a2a,stroke:#ffcc00,color:#fff
+    style G fill:#2a4a2a,stroke:#4aff9e,color:#fff

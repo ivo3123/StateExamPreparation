@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant Клиент
+    participant Stub
+    participant Skeleton
+    participant Сървър
+    
+    Клиент->>Stub: 1. Локално извикване
+    Stub->>Stub: 2. Маршалинг (сериализация)
+    Stub->>Skeleton: 3. Мрежов трансфер
+    Skeleton->>Skeleton: 4. Демаршалинг
+    Skeleton->>Сървър: 5. Изпълнение на логика
+    Сървър->>Skeleton: 6. Резултат
+    Skeleton->>Skeleton: 7. Маршалинг
+    Skeleton->>Stub: 8. Мрежов трансфер
+    Stub->>Stub: 9. Демаршалинг
+    Stub->>Клиент: 10. Връщане на резултат

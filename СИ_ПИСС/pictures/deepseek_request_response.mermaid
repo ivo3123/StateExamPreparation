@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant Клиент as 💻 Клиент
+    participant ClientEngine as ⚙️ Клиентски<br/>SOAP Engine
+    participant ServerEngine as ⚙️ Сървърен<br/>SOAP Engine
+    participant Сървър as 🖥️ Сървър
+
+    Note over Клиент,ClientEngine: ЗАЯВКА (Request)
+    Клиент->>ClientEngine: 1. getPrice(105)
+    ClientEngine->>ClientEngine: 2. Маршалинг (int → XML)
+    ClientEngine->>ServerEngine: 3. SOAP Request по HTTP
+    
+    Note over ServerEngine,Сървър: ОБРАБОТКА
+    ServerEngine->>ServerEngine: 4. Демаршалинг (XML → int)
+    ServerEngine->>Сървър: 5. getPrice(105)
+    Сървър->>ServerEngine: 6. Връща 100.50
+    
+    Note over ServerEngine,Клиент: ОТГОВОР (Response)
+    ServerEngine->>ServerEngine: 7. Маршалинг (double → XML)
+    ServerEngine->>ClientEngine: 8. SOAP Response по HTTP
+    ClientEngine->>ClientEngine: 9. Демаршалинг (XML → double)
+    ClientEngine->>Клиент: 10. Връща 100.50

@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant Сървър as 🖥️ Сървър
+    participant UDDI as 📒 UDDI Регистър
+    participant Клиент as 💻 Клиент
+
+    rect rgb(60, 80, 120)
+        Note over Сървър,UDDI: СТЪПКА 1: ПУБЛИКУВАНЕ
+        Сървър->>Сървър: Генерира WSDL
+        Сървър->>UDDI: Публикува WSDL
+    end
+
+    rect rgb(120, 100, 60)
+        Note over Клиент,UDDI: СТЪПКА 2: ОТКРИВАНЕ
+        Клиент->>UDDI: Търси услуга
+        UDDI->>Клиент: Връща WSDL адрес
+        Клиент->>Сървър: Сваля WSDL
+    end
+
+    rect rgb(60, 120, 60)
+        Note over Клиент,Сървър: СТЪПКА 3: ИЗПЪЛНЕНИЕ
+        Note over UDDI: ⚠️ UDDI вече НЕ участва!
+        Клиент->>Сървър: SOAP Request (XML)
+        Сървър->>Сървър: Демаршалинг
+        Сървър->>Клиент: SOAP Response (XML)
+        Клиент->>Клиент: Демаршалинг
+    end
